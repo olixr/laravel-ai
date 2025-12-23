@@ -11,9 +11,111 @@
 
 The official Laravel AI SDK.
 
-## Official Documentation
+- [Installation](#installation)
+- [Agents](#agents)
+    - [Streaming](#streaming)
+    - [Structured Output](#structured-output)
 
-Documentation for the Laravel AI SDK can be found on the [Laravel website](https://laravel.com/docs/ai).
+## Installation
+
+You can install the Laravel AI SDK via Composer:
+
+```shell
+composer require laravel/ai
+```
+
+Or, if this package has not been publicly released yet, you can install it via a Composer "path" repository. First, clone this repository to your local machine, then add the path repository to your application's `composer.json` file:
+
+```json
+"repositories": [
+    {
+        "type": "path",
+        "url": "./../laravel-ai"
+    }
+],
+```
+
+Then, add `"laravel/ai": "*"` to your Composer dependencies. You will likely also need to adjust your application's `minimum-stability` to `dev`. Finally, run `composer update`.
+
+## Agents
+
+You can create an agent via the package's Artisan commands:
+
+```shell
+php artisan make:agent SalesCoach
+
+php artisan make:agent SalesCoach --structured
+```
+
+Within the generated agent class, you can define the system prompt / instructions, message context, available tools, and output schema (if applicable).
+
+To prompt an agent, you may use the various methods provided by the agent's `Promptable` trait:
+
+```php
+$response = (new SalesCoach)->prompt('Analyze this sales transcript...');
+
+return (string) $response;
+```
+
+### Streaming
+
+You may stream an agent's response by invoking the `stream` method. The returned `StreamableAgentResponse` may be returned from a route to automatically send a streaming response to the client:
+
+```php
+Route::get('/coach', function () {
+    return (new SalesCoach)->stream('Analyze this sales transcript...');
+});
+```
+
+Alternatively, you may iterate through the streamed events manually:
+
+```php
+$stream (new SalesCoach)->stream('Analyze this sales transcript...');
+
+foreach ($stream as $event) {
+    // ...
+}
+```
+
+### Structured Output
+
+If you would like your agent to return structured output, implement the `HasStructuredOutput` interface, which requires that your agent define a `schema` method:
+
+```php
+<?php
+
+namespace App\Ai\Agents;
+
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasStructuredOutput;
+use Laravel\Ai\Promptable;
+
+class SalesCoach implements Agent, HasStructuredOutput
+{
+    use Promptable;
+
+    // ...
+
+    /**
+     * Get the agent's structured output schema definition.
+     */
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            'score' => $schema->integer()->required(),
+        ];
+    }
+}
+```
+
+When prompting an agent that returns structured output, you can access the returned `StructuredAgentResponse` like an array:
+
+```php
+$response = (new SalesCoach)->prompt('Analyze this sales transcript...');
+
+return $response['score'];
+```
 
 ## Contributing
 
