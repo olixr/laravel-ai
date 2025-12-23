@@ -63,9 +63,13 @@ XAI_API_KEY=
 ### Provider Support
 
 **Text:** OpenAI, Anthropic, Gemini, Groq, xAI
+
 **Images:**: OpenAI, Gemini, xAI
+
 **TTS:**: OpenAI, ElevenLabs
+
 **STT:**: OpenAI, ElevenLabs
+
 **Embeddings:**: OpenAI, Gemini
 
 ## Agents
