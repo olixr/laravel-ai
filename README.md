@@ -21,6 +21,7 @@ The official Laravel AI SDK.
     - [Structured Output](#structured-output)
     - [Attachments](#attachments)
     - [Streaming](#streaming)
+    - [Broadcasting](#broadcasting)
     - [Queueing](#queueing)
     - [Anonymous Agents](#anonymous-agents)
 - [Images](#images)
@@ -372,11 +373,35 @@ Route::get('/coach', function () {
 Alternatively, you may iterate through the streamed events manually:
 
 ```php
-$stream (new SalesCoach)->stream('Analyze this sales transcript...');
+$stream = (new SalesCoach)->stream('Analyze this sales transcript...');
 
 foreach ($stream as $event) {
     // ...
 }
+```
+
+### Broadcasting
+
+You may broadcast streamed events in a few different ways. First, you can simply invoke the `broadcast` or `broadcastNow` method on a streamed event:
+
+```php
+use App\Ai\Agents\SalesCoach;
+use Illuminate\Broadcasting\Channel;
+
+$stream = (new SalesCoach)->stream('Analyze this sales transcript...');
+
+foreach ($stream as $event) {
+    $event->broadcast(new Channel('channel-name'));
+}
+```
+
+Or, you can invoke an agent's `broadcastOnQueue` method to queue the agent operation and broadcast the streamed events as they are available:
+
+```php
+(new SalesCoach)->broadcastOnQueue(
+    'Analyze this sales transcript...'
+    new Channel('channel-name'),
+);
 ```
 
 ### Queueing
