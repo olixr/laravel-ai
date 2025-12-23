@@ -1,0 +1,63 @@
+<?php
+
+namespace Laravel\Ai\PendingResponses;
+
+use Laravel\Ai\Ai;
+use Laravel\Ai\Exceptions\FailoverableException;
+use Laravel\Ai\Jobs\GenerateEmbeddings;
+use Laravel\Ai\Providers\Provider;
+use Laravel\Ai\Responses\EmbeddingsResponse;
+use Laravel\Ai\Responses\QueuedEmbeddingsResponse;
+
+class PendingEmbeddingsGeneration
+{
+    protected ?int $dimensions = null;
+
+    public function __construct(
+        protected array $inputs,
+    ) {}
+
+    /**
+     * Specify the dimensions for the embeddings.
+     */
+    public function dimensions(int $dimensions): self
+    {
+        $this->dimensions = $dimensions;
+
+        return $this;
+    }
+
+    /**
+     * Generate the embeddings.
+     */
+    public function generate(array|string|null $provider = null, ?string $model = null): EmbeddingsResponse
+    {
+        $providers = Provider::formatProviderAndModelList(
+            $provider ?? config('ai.default_for_embeddings'), $model
+        );
+
+        foreach ($providers as $provider => $model) {
+            $provider = Ai::embeddingProvider($provider);
+
+            $dimensions = $this->dimensions ?: $provider->defaultEmbeddingsDimensions();
+
+            try {
+                return $provider->embeddings($this->inputs, $dimensions, $model);
+            } catch (FailoverableException $e) {
+                continue;
+            }
+        }
+
+        throw $e;
+    }
+
+    /**
+     * Queue the generation of the audio.
+     */
+    public function queue(array|string|null $provider = null, ?string $model = null): QueuedEmbeddingsResponse
+    {
+        return new QueuedEmbeddingsResponse(
+            GenerateEmbeddings::dispatch($this, $provider, $model),
+        );
+    }
+}

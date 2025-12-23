@@ -1,0 +1,35 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Ai\Contracts\Tool;
+
+class {{ class }} implements Tool
+{
+    /**
+     * Get the description of the tool's purpose.
+     */
+    public function description(): string
+    {
+        return 'A description of the tool.';
+    }
+
+    /**
+     * Execute the tool.
+     */
+    public function handle(array $input): string
+    {
+        //
+    }
+
+    /**
+     * Get the tool's schema definition.
+     */
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            'value' => $schema->string()->required(),
+        ];
+    }
+}

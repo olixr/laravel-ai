@@ -1,0 +1,36 @@
+<?php
+
+namespace Laravel\Ai\Responses;
+
+use Illuminate\Support\Str;
+use Laravel\Ai\Concerns\Storable;
+use Laravel\Ai\Data\Meta;
+
+class AudioResponse
+{
+    use Storable;
+
+    public function __construct(
+        public string $audio,
+        public Meta $meta,
+        public ?string $mime = null,
+    ) {}
+
+    /**
+     * Get a default filename for the file.
+     */
+    protected function randomStorageName(): string
+    {
+        return once(fn () => Str::random(40).match ($this->mime) {
+            default => '.mp3',
+        });
+    }
+
+    /**
+     * Get the raw representation of the audio.
+     */
+    public function raw(): string
+    {
+        return base64_decode($this->audio);
+    }
+}

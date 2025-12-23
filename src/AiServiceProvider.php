@@ -1,0 +1,56 @@
+<?php
+
+namespace Laravel\Ai;
+
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Stringable;
+use Laravel\Ai\Console\Commands\MakeAgentCommand;
+use Laravel\Ai\Console\Commands\MakeToolCommand;
+
+class AiServiceProvider extends ServiceProvider
+{
+    /**
+     * Register the package's services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->singleton(fn ($app): AiManager => new AiManager($app));
+
+        $this->mergeConfigFrom(__DIR__.'/../config/ai.php', 'ai');
+    }
+
+    /**
+     * Bootstrap the package's services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        if ($this->app->runningInConsole()) {
+            $this->registerCommands();
+        }
+
+        Stringable::macro('toEmbeddings', function (
+            ?string $provider = null,
+            ?int $dimensions = null,
+            ?string $model = null
+        ) {
+            return Ai::embeddingProvider($provider ?? config('ai.default_for_embeddings'))
+                ->embeddings([$this->value], $dimensions, $model)
+                ->embeddings[0];
+        });
+    }
+
+    /**
+     * Register the package's console commands.
+     */
+    protected function registerCommands(): void
+    {
+        $this->commands([
+            MakeAgentCommand::class,
+            MakeToolCommand::class,
+        ]);
+    }
+}
