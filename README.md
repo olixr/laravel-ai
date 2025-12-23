@@ -12,11 +12,15 @@
 The official Laravel AI SDK.
 
 - [Installation](#installation)
+    - [Configuration](#configuration)
 - [Agents](#agents)
+    - [Prompting](#prompting)
     - [Conversation Context](#conversation-context)
     - [Tools](#tools)
     - [Structured Output](#structured-output)
+    - [Attachments](#attachments)
     - [Streaming](#streaming)
+    - [Queueing](#queueing)
 
 ## Installation
 
@@ -39,6 +43,18 @@ Or, if this package has not been publicly released yet, you can install it via a
 
 Then, add `"laravel/ai": "*"` to your Composer dependencies. You will likely also need to adjust your application's `minimum-stability` to `dev`. Finally, run `composer update`.
 
+### Configuration
+
+You may define your AI provider credentials in your application's `config/ai.php` configuration file or as environment variables in your application's `.env` file:
+
+```ini
+ANTHROPIC_API_KEY=
+ELEVENLABS_API_KEY=
+GEMINI_API_KEY=
+OPENAI_API_KEY=
+XAI_API_KEY=
+```
+
 ## Agents
 
 You can create an agent via the package's Artisan commands:
@@ -50,6 +66,8 @@ php artisan make:agent SalesCoach --structured
 ```
 
 Within the generated agent class, you can define the system prompt / instructions, message context, available tools, and output schema (if applicable).
+
+### Prompting
 
 To prompt an agent, you may use the various methods provided by the agent's `Promptable` trait:
 
@@ -190,6 +208,40 @@ $response = (new SalesCoach)->prompt('Analyze this sales transcript...');
 return $response['score'];
 ```
 
+### Attachments
+
+When prompting, you may also pass attachments with the prompt to allow the model to inspect images and documents:
+
+```php
+use App\Ai\Agents\SalesCoach;
+use Laravel\Ai\Messages\Attachments\Document;
+
+$response = (new SalesCoach)->prompt(
+    'Analyze the attached sales transcript...'
+    attachments: [
+        Document::fromStorage('transcript.pdf') // Attach a document from a filesystem disk...
+        Document::fromPath('/home/laravel/transcript.md') // Attach a document from a local path...
+        $request->file('transcript'), // Attach an uploaded file...
+    ]
+);
+```
+
+Likewise, the `Laravel\Ai\Messages\Attachments\Image` class may be used to attach images to a prompt:
+
+```php
+use App\Ai\Agents\ImageAnalyzer;
+use Laravel\Ai\Messages\Attachments\Image;
+
+$response = (new ImageAnalyzer)->prompt(
+    'What is in this image?'
+    attachments: [
+        Image::fromStorage('photo.jpg') // Attach an image from a filesystem disk...
+        Image::fromPath('/home/laravel/photo.jpg') // Attach an image from a local path...
+        $request->file('photo'), // Attach an uploaded file...
+    ]
+);
+```
+
 ### Streaming
 
 You may stream an agent's response by invoking the `stream` method. The returned `StreamableAgentResponse` may be returned from a route to automatically send a streaming response to the client:
@@ -208,6 +260,29 @@ $stream (new SalesCoach)->stream('Analyze this sales transcript...');
 foreach ($stream as $event) {
     // ...
 }
+```
+
+### Queueing
+
+Using an agent's `queue` method, you may prompt the agent, but allow it to process the response in the background, keeping your application feeling fast and responsive. The `then` and `catch` methods may be used to register closures that will be invoked when a response is available or if an exception occurs:
+
+```php
+use Illuminate\Http\Request;
+use Laravel\Ai\Responses\AgentResponse;
+use Throwable;
+
+Route::post('/coach', function (Request $request) {
+    return (new SalesCoach)
+        ->queue($request->input('transcript'))
+        ->then(function (AgentResponse $response) {
+            // ...
+        })
+        ->catch(function (Throwable $e) {
+            // ...
+        });
+
+    return back();
+});
 ```
 
 ## Contributing
