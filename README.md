@@ -26,6 +26,8 @@ The official Laravel AI SDK.
 - [Audio (TTS)](#audio)
 - [Transcription (STT)](#transcription)
 - [Embeddings](#embeddings)
+- [Failover](#failover)
+- [Events](#events)
 
 ## Installation
 
@@ -59,6 +61,8 @@ GEMINI_API_KEY=
 OPENAI_API_KEY=
 XAI_API_KEY=
 ```
+
+The default models used for text, images, audio, transcription, and embeddings may also be configured in your application's `config/ai.php` configuration file.
 
 ### Provider Support
 
@@ -161,6 +165,15 @@ To prompt an agent, you may use the various methods provided by the agent's `Pro
 $response = (new SalesCoach)->prompt('Analyze this sales transcript...');
 
 return (string) $response;
+```
+
+By passing additional arguments to the `prompt` method, you may override the default provider or model when prompting:
+
+```php
+$response = (new SalesCoach)->prompt(
+    'Analyze this sales transcript...',
+    provider: 'anthropic',
+);
 ```
 
 ### Conversation Context
@@ -333,8 +346,25 @@ $response = (new ImageAnalyzer)->prompt(
 You may stream an agent's response by invoking the `stream` method. The returned `StreamableAgentResponse` may be returned from a route to automatically send a streaming response to the client:
 
 ```php
+use App\Ai\Agents\SalesCoach;
+
 Route::get('/coach', function () {
     return (new SalesCoach)->stream('Analyze this sales transcript...');
+});
+```
+
+The `then` method may be used to provide a closure that will be invoked when the entire response has been streamed to the client:
+
+```php
+use App\Ai\Agents\SalesCoach;
+use Laravel\Ai\Responses\StreamedAgentResponse;
+
+Route::get('/coach', function () {
+    return (new SalesCoach)
+        ->stream('Analyze this sales transcript...')
+        ->then(function (StreamedAgentResponse $response) {
+            // ...
+        });
 });
 ```
 
@@ -480,7 +510,83 @@ Audio::of('I love coding with Laravel.')
 
 ## Transcriptions
 
+The `Laravel\Ai\Transcription` class may be used to generate a transcript of the given audio:
+
+```php
+use Laravel\Ai\Transcription;
+
+$transcript = Transcription::of($request->file('audio'))->generate();
+$transcript = Transcription::fromStorage('audio.mp3')->generate();
+$transcript = Transcription::fromPath('/home/laravel/audio.mp3')->generate();
+
+return (string) $transcript;
+```
+
+The `diarize` method may be used to indicate you would like the response to include the diarized transcript in addition to the raw text transcript, allowing you to access the segmented transcript by speaker:
+
+```php
+$transcript = Transcription::fromStorage('audio.mp3')
+    ->diarize()
+    ->generate();
+```
+
+Transcription generation may also be queued:
+
+```php
+use Laravel\Ai\Transcription;
+use Laravel\Ai\Responses\TranscriptionResponse;
+
+Transcription::fromStorage('audio.mp3')
+    ->queue(function (TranscriptionResponse $transcript) {
+        // ...
+    });
+```
+
 ## Embeddings
+
+You may easily generate vector embeddings for any given string using the new `toEmbeddings` method available via Laravel's `Stringable` class:
+
+```php
+use Illuminate\Support\Str;
+
+$embeddings = Str::of('Napa Valley has great wine.')->toEmbeddings();
+```
+
+## Failover
+
+When prompting or generating other media, you may provide an array of providers / models to automatically failover to a backup provider / model if a service interruption or rate limit is encountered on the primary provider:
+
+```php
+use App\Ai\Agents\SalesCoach;
+use Laravel\Ai\Image;
+
+$response = (new SalesCoach)->prompt(
+    'Analyze this sales transcript...',
+    provider: ['openai', 'anthropic'],
+);
+
+$image = Image::of('A donut sitting on the kitchen counter')
+    ->generate(provider: ['gemini', 'xai']);
+```
+
+## Events
+
+The Laravel AI SDK dispatches a variety of events, including:
+
+- `AgentInvoked`
+- `AgentStreamed`
+- `AudioGenerated`
+- `EmbeddingsGenerated`
+- `GeneratingAudio`
+- `GeneratingEmbeddings`
+- `GeneratingImage`
+- `GeneratingTranscription`
+- `ImageGenerated`
+- `InvokingAgent`
+- `InvokingTool`
+- `StreamingAgent`
+- `ToolInvoked`
+- `TranscriptionGenerated`
 
 ## Contributing
 
