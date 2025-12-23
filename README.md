@@ -343,7 +343,7 @@ $response = (new ImageAnalyzer)->prompt(
 
 ### Streaming
 
-You may stream an agent's response by invoking the `stream` method. The returned `StreamableAgentResponse` may be returned from a route to automatically send a streaming response to the client:
+You may stream an agent's response by invoking the `stream` method. The returned `StreamableAgentResponse` may be returned from a route to automatically send a streaming response (SSE) to the client:
 
 ```php
 use App\Ai\Agents\SalesCoach;
