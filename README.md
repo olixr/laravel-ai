@@ -382,6 +382,20 @@ foreach ($stream as $event) {
 }
 ```
 
+#### Streaming Using the Vercel AI SDK Protocol
+
+You may stream the events using the Vercel AI SDK stream protocol by invoking the `usingVercelProtocol` method on the streamable response:
+
+```php
+use App\Ai\Agents\SalesCoach;
+
+Route::get('/coach', function () {
+    return (new SalesCoach)
+        ->stream('Analyze this sales transcript...')
+        ->usingVercelProtocol();
+});
+```
+
 ### Broadcasting
 
 You may broadcast streamed events in a few different ways. First, you can simply invoke the `broadcast` or `broadcastNow` method on a streamed event:
