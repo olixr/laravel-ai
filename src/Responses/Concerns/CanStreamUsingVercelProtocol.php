@@ -17,12 +17,14 @@ trait CanStreamUsingVercelProtocol
     {
         $state = new class {
             public $streamStarted = false;
+            public ?array $lastStreamEndEvent = null;
         };
 
         return response()->stream(function () use ($state) {
             $lastStreamEndEvent = null;
 
             foreach ($this as $event) {
+                // Send one stream start event...
                 if ($event instanceof StreamStart) {
                     if ($state->streamStarted) {
                         continue;
@@ -31,8 +33,9 @@ trait CanStreamUsingVercelProtocol
                     $state->streamStarted = true;
                 }
 
+                // Save the last stream end event until the very end...
                 if ($event instanceof StreamEnd) {
-                    $lastStreamEndEvent = $event;
+                    $state->lastStreamEndEvent = $event->toVercelProtocolArray();
 
                     continue;
                 }
@@ -44,8 +47,8 @@ trait CanStreamUsingVercelProtocol
                 yield 'data: '.json_encode($data)."\n\n";
             }
 
-            if ($lastStreamEndEvent) {
-                yield 'data: '.json_encode($lastStreamEndEvent->toVercelProtocolArray())."\n\n";
+            if ($state->lastStreamEndEvent) {
+                yield 'data: '.json_encode($state->lastStreamEndEvent)."\n\n";
             }
 
             yield "data: [DONE]\n\n";
