@@ -4,6 +4,7 @@ namespace Tests\Feature\Tools;
 
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
+use Laravel\Ai\Tools\Request;
 
 class FixedNumberGenerator implements Tool
 {
@@ -20,7 +21,7 @@ class FixedNumberGenerator implements Tool
     /**
      * Execute the tool.
      */
-    public function handle(array $input): string
+    public function handle(Request $request): string
     {
         if ($this->throwsException) {
             throw new \Exception('Forced to throw exception.');

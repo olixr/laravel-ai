@@ -30,6 +30,7 @@ use Laravel\Ai\Responses\ImageResponse;
 use Laravel\Ai\Responses\StructuredTextResponse;
 use Laravel\Ai\Responses\TextResponse;
 use Laravel\Ai\Responses\TranscriptionResponse;
+use Laravel\Ai\Tools\Request as ToolRequest;
 use Prism\Prism\Enums\Provider as PrismProvider;
 use Prism\Prism\Enums\ToolChoice;
 use Prism\Prism\Exceptions\PrismException as PrismVendorException;
@@ -159,7 +160,7 @@ class PrismGateway implements Gateway
 
                         call_user_func($this->invokingToolCallback, $tool, $arguments);
 
-                        return (string) tap($tool->handle($arguments), function ($result) use ($tool, $arguments) {
+                        return (string) tap($tool->handle(new ToolRequest($arguments)), function ($result) use ($tool, $arguments) {
                             call_user_func($this->toolInvokedCallback, $tool, $arguments, $result);
                         });
                     })

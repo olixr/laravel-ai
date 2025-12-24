@@ -4,6 +4,7 @@ namespace Tests\Feature\Tools;
 
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
+use Laravel\Ai\Tools\Request;
 
 class RandomNumberGenerator implements Tool
 {
@@ -20,13 +21,13 @@ class RandomNumberGenerator implements Tool
     /**
      * Execute the tool.
      */
-    public function handle(array $input): string
+    public function handle(Request $request): string
     {
         if ($this->throwsException) {
             throw new \Exception('Forced to throw exception.');
         }
 
-        return random_int($input['min'], $input['max']);
+        return random_int($request['min'], $request['max']);
     }
 
     /**

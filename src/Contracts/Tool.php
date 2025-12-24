@@ -3,6 +3,7 @@
 namespace Laravel\Ai\Contracts;
 
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Ai\Tools\Request;
 
 interface Tool
 {
@@ -14,7 +15,7 @@ interface Tool
     /**
      * Execute the tool.
      */
-    public function handle(array $input): string;
+    public function handle(Request $request): string;
 
     /**
      * Get the tool's schema definition.
