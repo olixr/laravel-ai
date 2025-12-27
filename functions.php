@@ -3,7 +3,10 @@
 namespace Laravel\Ai;
 
 use Closure;
+use Illuminate\Container\Container;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Pipeline\Pipeline;
+use Illuminate\Support\Str;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 
@@ -33,4 +36,20 @@ function agent(
     } else {
         return new class($instructions, $messages, $tools) extends AnonymousAgent {};
     }
+}
+
+/**
+ * Get a new pipeline instance.
+ */
+function pipeline(): Pipeline
+{
+    return new Pipeline(Container::getInstance());
+}
+
+/**
+ * Generate a new ULID.
+ */
+function ulid(): string
+{
+    return strtolower((string) Str::ulid());
 }

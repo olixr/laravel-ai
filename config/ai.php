@@ -58,6 +58,10 @@ return [
             'key' => env('GROQ_API_KEY'),
         ],
 
+        'loopback' => [
+            'driver' => 'loopback',
+        ],
+
         'xai' => [
             'driver' => 'xai',
             'key' => env('XAI_API_KEY'),

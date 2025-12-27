@@ -5,6 +5,8 @@ namespace Laravel\Ai;
 use Closure;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
+use Laravel\Ai\Contracts\HasMiddleware;
 use Laravel\Ai\Exceptions\FailoverableException;
 use Laravel\Ai\Jobs\BroadcastAgent;
 use Laravel\Ai\Jobs\InvokeAgent;
@@ -24,7 +26,11 @@ trait Promptable
     public function prompt(string $prompt, array $attachments = [], array|string|null $provider = null, ?string $model = null): AgentResponse
     {
         return $this->withModelFailover(
-            fn ($provider, $model) => $provider->prompt($this, $prompt, $attachments, $model),
+            $this->withinMiddlewarePipeline(function (AgentPrompt $prompt) {
+                return $prompt->provider()->prompt(
+                    $this, $prompt->prompt, $prompt->attachments->all(), $prompt->model
+                );
+            }, $prompt, $attachments),
             $provider,
             $model,
         );
@@ -36,7 +42,11 @@ trait Promptable
     public function stream(string $prompt, array $attachments = [], ?string $provider = null, ?string $model = null): StreamableAgentResponse
     {
         return $this->withModelFailover(
-            fn ($provider, $model) => $provider->stream($this, $prompt, $attachments, $model),
+            $this->withinMiddlewarePipeline(function (AgentPrompt $prompt) {
+                return $prompt->provider()->stream(
+                    $this, $prompt->prompt, $prompt->attachments->all(), $prompt->model
+                );
+            }, $prompt, $attachments),
             $provider,
             $model,
         );
@@ -84,7 +94,7 @@ trait Promptable
     /**
      * Invoke the given Closure with provider / model failover.
      */
-    protected function withModelFailover(Closure $callback, array|string|null $provider, ?string $model): mixed
+    private function withModelFailover(Closure $callback, array|string|null $provider, ?string $model): mixed
     {
         $providers = $this->getProvidersAndModels($provider, $model);
 
@@ -101,6 +111,23 @@ trait Promptable
         }
 
         throw $e;
+    }
+
+    /**
+     * Wrap the given Closure in an agent middleware pipeline.
+     */
+    private function withinMiddlewarePipeline(Closure $callback, string $prompt, array $attachments): Closure
+    {
+        return fn (Provider $provider, string $model) => pipeline()
+            ->send(new AgentPrompt(
+                $this,
+                $prompt,
+                new Collection($attachments),
+                $provider->providerName(),
+                $model
+            ))
+            ->through($this instanceof HasMiddleware ? $this->middleware() : [])
+            ->then($callback);
     }
 
     /**

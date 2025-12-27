@@ -14,6 +14,7 @@ use Laravel\Ai\Providers\AnthropicProvider;
 use Laravel\Ai\Providers\ElevenLabsProvider;
 use Laravel\Ai\Providers\GeminiProvider;
 use Laravel\Ai\Providers\GroqProvider;
+use Laravel\Ai\Providers\LoopbackProvider;
 use Laravel\Ai\Providers\OpenAiProvider;
 use Laravel\Ai\Providers\Provider;
 use Laravel\Ai\Providers\XaiProvider;
@@ -152,6 +153,17 @@ class AiManager extends MultipleInstanceManager
     {
         return new OpenAiProvider(
             new PrismGateway($this->app['events']),
+            $config,
+            $this->app->make(Dispatcher::class)
+        );
+    }
+
+    /**
+     * Create a loopback provider instance, primarily used for testing.
+     */
+    public function createLoopbackDriver(array $config): LoopbackProvider
+    {
+        return new LoopbackProvider(
             $config,
             $this->app->make(Dispatcher::class)
         );

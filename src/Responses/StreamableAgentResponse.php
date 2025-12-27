@@ -49,6 +49,13 @@ class StreamableAgentResponse implements IteratorAggregate, Responsable
      */
     public function then(callable $callback): self
     {
+        // If the response has already been iterated / streamed, invoke now...
+        if (count($this->events) > 0) {
+            $callback($this);
+
+            return $this;
+        }
+
         $this->thenCallbacks[] = $callback;
 
         return $this;
