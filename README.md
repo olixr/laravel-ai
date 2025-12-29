@@ -362,13 +362,13 @@ The `then` method may be used to provide a closure that will be invoked when the
 
 ```php
 use App\Ai\Agents\SalesCoach;
-use Laravel\Ai\Responses\StreamedAgentResponse;
+use Laravel\Ai\Responses\StreamableAgentResponse;
 
 Route::get('/coach', function () {
     return (new SalesCoach)
         ->stream('Analyze this sales transcript...')
-        ->then(function (StreamedAgentResponse $response) {
-            // ...
+        ->then(function (StreamableAgentResponse $response) {
+            // $response->text, $response->events, $response->usage...
         });
 });
 ```
