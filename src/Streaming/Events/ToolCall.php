@@ -2,7 +2,7 @@
 
 namespace Laravel\Ai\Streaming\Events;
 
-use Laravel\Ai\Data;
+use Laravel\Ai\Responses\Data;
 
 class ToolCall extends StreamEvent
 {

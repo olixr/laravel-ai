@@ -3,7 +3,6 @@
 namespace Laravel\Ai\Streaming\Events;
 
 use Illuminate\Support\Collection;
-use Laravel\Ai\Responses\Data;
 use Laravel\Ai\Responses\Data\Usage;
 
 class StreamEnd extends StreamEvent
@@ -11,7 +10,7 @@ class StreamEnd extends StreamEvent
     public function __construct(
         public string $id,
         public string $reason,
-        public Data\Usage $usage,
+        public Usage $usage,
         public int $timestamp,
     ) {
         //
@@ -41,7 +40,7 @@ class StreamEnd extends StreamEvent
             'invocation_id' => $this->invocationId,
             'type' => 'stream_end',
             'reason' => $this->reason,
-            'usage' => $this->usage instanceof Data\Usage
+            'usage' => $this->usage instanceof Usage
                 ? $this->usage->toArray()
                 : null,
             'timestamp' => $this->timestamp,
