@@ -26,14 +26,6 @@ class AgentPrompt extends Prompt
     }
 
     /**
-     * Get the provider instance.
-     */
-    public function provider(): TextProvider
-    {
-        return $this->provider;
-    }
-
-    /**
      * Revise the prompt and return a new prompt instance.
      */
     public function revise(string $prompt, Collection|array|null $attachments = null): AgentPrompt
@@ -57,5 +49,13 @@ class AgentPrompt extends Prompt
     public function withAttachments(Collection|array $attachments): AgentPrompt
     {
         return $this->revise($this->prompt, $attachments);
+    }
+
+    /**
+     * Get the provider instance.
+     */
+    public function provider(): TextProvider
+    {
+        return $this->provider;
     }
 }
