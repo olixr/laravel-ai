@@ -123,6 +123,44 @@ class AgentIntegrationTest extends TestCase
         unset($_SERVER['__testing.response']);
     }
 
+    public function test_ad_hoc_agents_can_queue_a_response(): void
+    {
+        agent()->queue(
+            'What is the name of the PHP framework created by Taylor Otwell?',
+            provider: $this->provider,
+            model: $this->model,
+        )->then(function (AgentResponse $response) {
+            $_ENV['__testing.response'] = $response;
+        });
+
+        $response = $_ENV['__testing.response'];
+
+        $this->assertTrue(str_contains($response->text, 'Laravel'));
+
+        unset($_SERVER['__testing.response']);
+    }
+
+    public function test_ad_hoc_structured_agents_can_queue_a_response(): void
+    {
+        agent(
+            schema: fn ($schema) => [
+                'symbol' => $schema->string()->required(),
+            ]
+        )->queue(
+            'What is the chemical symbol for silver?',
+            provider: $this->provider,
+            model: $this->model,
+        )->then(function (AgentResponse $response) {
+            $_ENV['__testing.response'] = $response;
+        });
+
+        $response = $_ENV['__testing.response'];
+
+        $this->assertEquals('ag', strtolower($response['symbol']));
+
+        unset($_SERVER['__testing.response']);
+    }
+
     public function test_agents_can_have_conversation_state(): void
     {
         $agent = new ConversationalAgent;
