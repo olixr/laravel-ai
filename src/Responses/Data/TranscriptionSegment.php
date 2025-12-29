@@ -1,6 +1,6 @@
 <?php
 
-namespace Laravel\Ai\Data;
+namespace Laravel\Ai\Responses\Data;
 
 class TranscriptionSegment
 {

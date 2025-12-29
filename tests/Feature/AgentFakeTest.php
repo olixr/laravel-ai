@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use Laravel\Ai\Data\Meta;
-use Laravel\Ai\Data\Usage;
+use Laravel\Ai\Responses\Data\Meta;
+use Laravel\Ai\Responses\Data\Usage;
 use Laravel\Ai\Responses\StructuredTextResponse;
 use Laravel\Ai\Responses\TextResponse;
 use RuntimeException;

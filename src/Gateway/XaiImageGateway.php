@@ -6,12 +6,12 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Laravel\Ai\Contracts\Gateway\ImageGateway;
-use Laravel\Ai\Data\GeneratedImage;
-use Laravel\Ai\Data\Meta;
-use Laravel\Ai\Data\Usage;
 use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Messages\Attachments\Image as ImageAttachment;
 use Laravel\Ai\Providers\Provider;
+use Laravel\Ai\Responses\Data\GeneratedImage;
+use Laravel\Ai\Responses\Data\Meta;
+use Laravel\Ai\Responses\Data\Usage;
 use Laravel\Ai\Responses\ImageResponse;
 
 class XaiImageGateway implements ImageGateway

@@ -3,8 +3,8 @@
 namespace Laravel\Ai\Gateway\Prism;
 
 use Illuminate\Support\Traits\Conditionable;
-use Laravel\Ai\Data\ToolCall;
-use Laravel\Ai\Data\ToolResult;
+use Laravel\Ai\Responses\Data\ToolCall;
+use Laravel\Ai\Responses\Data\ToolResult;
 use Prism\Prism\Exceptions\PrismException;
 use Prism\Prism\Tool;
 use Prism\Prism\ValueObjects\ToolCall as PrismToolCall;

@@ -4,7 +4,7 @@ namespace Laravel\Ai\Responses;
 
 use Countable;
 use IteratorAggregate;
-use Laravel\Ai\Data\Meta;
+use Laravel\Ai\Responses\Data\Meta;
 use Traversable;
 
 class EmbeddingsResponse implements Countable, IteratorAggregate

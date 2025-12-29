@@ -7,14 +7,14 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Laravel\Ai\Contracts\Gateway\AudioGateway;
 use Laravel\Ai\Contracts\Gateway\TranscriptionGateway;
-use Laravel\Ai\Data\Meta;
-use Laravel\Ai\Data\TranscriptionSegment;
-use Laravel\Ai\Data\Usage;
 use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Messages\Attachments\Audio;
 use Laravel\Ai\Messages\Attachments\TranscribableAudio;
 use Laravel\Ai\Providers\Provider;
 use Laravel\Ai\Responses\AudioResponse;
+use Laravel\Ai\Responses\Data\Meta;
+use Laravel\Ai\Responses\Data\TranscriptionSegment;
+use Laravel\Ai\Responses\Data\Usage;
 use Laravel\Ai\Responses\TranscriptionResponse;
 
 class ElevenLabsGateway implements AudioGateway, TranscriptionGateway

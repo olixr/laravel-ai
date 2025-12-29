@@ -2,7 +2,7 @@
 
 namespace Laravel\Ai\Gateway\Prism;
 
-use Laravel\Ai\Data\Usage;
+use Laravel\Ai\Responses\Data\Usage;
 use Prism\Prism\ValueObjects\Usage as PrismUsageValueObject;
 
 class PrismUsage

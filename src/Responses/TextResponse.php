@@ -3,10 +3,10 @@
 namespace Laravel\Ai\Responses;
 
 use Illuminate\Support\Collection;
-use Laravel\Ai\Data\Meta;
-use Laravel\Ai\Data\Usage;
 use Laravel\Ai\Messages\AssistantMessage;
 use Laravel\Ai\Messages\ToolResultMessage;
+use Laravel\Ai\Responses\Data\Meta;
+use Laravel\Ai\Responses\Data\Usage;
 
 class TextResponse
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Laravel\Ai\Data;
+namespace Laravel\Ai\Responses\Data;
 
 use Illuminate\Support\Str;
 use Laravel\Ai\Concerns\Storable;

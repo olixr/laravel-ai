@@ -5,9 +5,9 @@ namespace Laravel\Ai\Responses;
 use Countable;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
-use Laravel\Ai\Data\GeneratedImage;
-use Laravel\Ai\Data\Meta;
-use Laravel\Ai\Data\Usage;
+use Laravel\Ai\Responses\Data\GeneratedImage;
+use Laravel\Ai\Responses\Data\Meta;
+use Laravel\Ai\Responses\Data\Usage;
 
 class ImageResponse implements Countable, Htmlable
 {

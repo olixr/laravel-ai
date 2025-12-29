@@ -3,8 +3,8 @@
 namespace Laravel\Ai\Streaming\Events;
 
 use Illuminate\Support\Collection;
-use Laravel\Ai\Data;
-use Laravel\Ai\Data\Usage;
+use Laravel\Ai\Responses\Data;
+use Laravel\Ai\Responses\Data\Usage;
 
 class StreamEnd extends StreamEvent
 {

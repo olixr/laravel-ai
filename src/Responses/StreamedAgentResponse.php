@@ -3,7 +3,7 @@
 namespace Laravel\Ai\Responses;
 
 use Illuminate\Support\Collection;
-use Laravel\Ai\Data\Meta;
+use Laravel\Ai\Responses\Data\Meta;
 use Laravel\Ai\Streaming\Events\StreamEnd;
 use Laravel\Ai\Streaming\Events\TextDelta;
 use Laravel\Ai\Streaming\Events\ToolCall;

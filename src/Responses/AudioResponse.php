@@ -4,7 +4,7 @@ namespace Laravel\Ai\Responses;
 
 use Illuminate\Support\Str;
 use Laravel\Ai\Concerns\Storable;
-use Laravel\Ai\Data\Meta;
+use Laravel\Ai\Responses\Data\Meta;
 
 class AudioResponse
 {

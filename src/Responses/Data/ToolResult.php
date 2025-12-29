@@ -1,15 +1,14 @@
 <?php
 
-namespace Laravel\Ai\Data;
+namespace Laravel\Ai\Responses\Data;
 
-class ToolCall
+class ToolResult
 {
     public function __construct(
         public string $id,
         public string $name,
         public array $arguments,
+        public $result,
         public ?string $resultId = null,
-        public ?string $reasoningId = null,
-        public ?array $reasoningSummary = null,
     ) {}
 }
