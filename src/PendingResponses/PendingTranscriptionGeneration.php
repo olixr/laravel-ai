@@ -4,6 +4,7 @@ namespace Laravel\Ai\PendingResponses;
 
 use Illuminate\Http\UploadedFile;
 use Laravel\Ai\Ai;
+use Laravel\Ai\Events\ProviderFailedOver;
 use Laravel\Ai\Exceptions\FailoverableException;
 use Laravel\Ai\Jobs\GenerateTranscription;
 use Laravel\Ai\Messages\Attachments\LocalAudio;
@@ -56,9 +57,13 @@ class PendingTranscriptionGeneration
         foreach ($providers as $provider => $model) {
             $provider = Ai::transcriptionProvider($provider);
 
+            $model ??= $provider->defaultTranscriptionModel();
+
             try {
                 return $provider->transcribe($this->audio, $this->language, $this->diarize, $model);
             } catch (FailoverableException $e) {
+                event(new ProviderFailedOver($provider, $model, $e));
+
                 continue;
             }
         }

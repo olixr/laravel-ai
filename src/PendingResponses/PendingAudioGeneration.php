@@ -3,6 +3,7 @@
 namespace Laravel\Ai\PendingResponses;
 
 use Laravel\Ai\Ai;
+use Laravel\Ai\Events\ProviderFailedOver;
 use Laravel\Ai\Exceptions\FailoverableException;
 use Laravel\Ai\Jobs\GenerateAudio;
 use Laravel\Ai\Providers\Provider;
@@ -71,11 +72,15 @@ class PendingAudioGeneration
         foreach ($providers as $provider => $model) {
             $provider = Ai::audioProvider($provider);
 
+            $model ??= $provider->defaultAudioModel();
+
             try {
                 return $provider->audio(
                     $this->text, $this->voice, $this->instructions, $model
                 );
             } catch (FailoverableException $e) {
+                event(new ProviderFailedOver($provider, $model, $e));
+
                 continue;
             }
         }

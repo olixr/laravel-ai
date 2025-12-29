@@ -3,6 +3,7 @@
 namespace Laravel\Ai\PendingResponses;
 
 use Laravel\Ai\Ai;
+use Laravel\Ai\Events\ProviderFailedOver;
 use Laravel\Ai\Exceptions\FailoverableException;
 use Laravel\Ai\Jobs\GenerateEmbeddings;
 use Laravel\Ai\Providers\Provider;
@@ -39,11 +40,15 @@ class PendingEmbeddingsGeneration
         foreach ($providers as $provider => $model) {
             $provider = Ai::embeddingProvider($provider);
 
+            $model ??= $provider->defaultEmbeddingsModel();
+
             $dimensions = $this->dimensions ?: $provider->defaultEmbeddingsDimensions();
 
             try {
                 return $provider->embeddings($this->inputs, $dimensions, $model);
             } catch (FailoverableException $e) {
+                event(new ProviderFailedOver($provider, $model, $e));
+
                 continue;
             }
         }

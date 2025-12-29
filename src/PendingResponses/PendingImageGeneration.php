@@ -3,6 +3,7 @@
 namespace Laravel\Ai\PendingResponses;
 
 use Laravel\Ai\Ai;
+use Laravel\Ai\Events\ProviderFailedOver;
 use Laravel\Ai\Exceptions\FailoverableException;
 use Laravel\Ai\Jobs\GenerateImage;
 use Laravel\Ai\Messages\Attachments\LocalImage;
@@ -102,11 +103,15 @@ class PendingImageGeneration
         foreach ($providers as $provider => $model) {
             $provider = Ai::imageProvider($provider);
 
+            $model ??= $provider->defaultImageModel();
+
             try {
                 return $provider->image(
                     $this->prompt, $this->attachments, $this->size, $this->quality, $model
                 );
             } catch (FailoverableException $e) {
+                event(new ProviderFailedOver($provider, $model, $e));
+
                 continue;
             }
         }

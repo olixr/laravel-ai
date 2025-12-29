@@ -41,7 +41,7 @@ class XaiImageGateway implements ImageGateway
                 ])
                 ->throw();
         } catch (RequestException $e) {
-            if ($e->status() === 429) {
+            if ($e->response->status() === 429) {
                 throw RateLimitedException::forProvider(
                     $provider->providerName(), $e->getCode(), $e
                 );
