@@ -12,10 +12,10 @@ use Laravel\Ai\Contracts\Providers\EmbeddingProvider;
 use Laravel\Ai\Contracts\Providers\ImageProvider;
 use Laravel\Ai\Contracts\Providers\TextProvider;
 use Laravel\Ai\Contracts\Providers\TranscriptionProvider;
+use Laravel\Ai\Gateway\FakeGateway;
 use Laravel\Ai\Gateway\Prism\PrismGateway;
 use Laravel\Ai\Providers\AnthropicProvider;
 use Laravel\Ai\Providers\ElevenLabsProvider;
-use Laravel\Ai\Providers\FakeProvider;
 use Laravel\Ai\Providers\GeminiProvider;
 use Laravel\Ai\Providers\GroqProvider;
 use Laravel\Ai\Providers\OpenAiProvider;
@@ -26,9 +26,9 @@ use LogicException;
 class AiManager extends MultipleInstanceManager
 {
     /**
-     * All of the registered fake agent providers.
+     * All of the registered fake agent gateways.
      */
-    protected array $fakeAgentProviders = [];
+    protected array $fakeAgentGateways = [];
 
     /**
      * The key name of the "driver" equivalent configuration option.
@@ -39,10 +39,8 @@ class AiManager extends MultipleInstanceManager
 
     /**
      * Get a provider instance by name.
-     *
-     * @param  string|null  $name
      */
-    public function audioProvider($name = null): AudioProvider
+    public function audioProvider(?string $name = null): AudioProvider
     {
         return tap($this->instance($name), function ($instance) {
             if (! $instance instanceof AudioProvider) {
@@ -53,10 +51,8 @@ class AiManager extends MultipleInstanceManager
 
     /**
      * Get a provider instance by name.
-     *
-     * @param  string|null  $name
      */
-    public function embeddingProvider($name = null): EmbeddingProvider
+    public function embeddingProvider(?string $name = null): EmbeddingProvider
     {
         return tap($this->instance($name), function ($instance) {
             if (! $instance instanceof EmbeddingProvider) {
@@ -67,10 +63,8 @@ class AiManager extends MultipleInstanceManager
 
     /**
      * Get a provider instance by name.
-     *
-     * @param  string|null  $name
      */
-    public function imageProvider($name = null): ImageProvider
+    public function imageProvider(?string $name = null): ImageProvider
     {
         return tap($this->instance($name), function ($instance) {
             if (! $instance instanceof ImageProvider) {
@@ -81,10 +75,8 @@ class AiManager extends MultipleInstanceManager
 
     /**
      * Get a provider instance by name.
-     *
-     * @param  string|null  $name
      */
-    public function textProvider($name = null): TextProvider
+    public function textProvider(?string $name = null): TextProvider
     {
         return tap($this->instance($name), function ($instance) {
             if (! $instance instanceof TextProvider) {
@@ -94,11 +86,21 @@ class AiManager extends MultipleInstanceManager
     }
 
     /**
-     * Get a provider instance by name.
-     *
-     * @param  string|null  $name
+     * Get a provider instance for an agent by name.
      */
-    public function transcriptionProvider($name = null): TranscriptionProvider
+    public function textProviderFor(Agent $agent, ?string $name = null): TextProvider
+    {
+        $provider = $this->textProvider($name);
+
+        return $this->hasFakeGatewayFor($agent)
+            ? (clone $provider)->useTextGateway($this->fakeGatewayFor($agent))
+            : $provider;
+    }
+
+    /**
+     * Get a provider instance by name.
+     */
+    public function transcriptionProvider(?string $name = null): TranscriptionProvider
     {
         return tap($this->instance($name), function ($instance) {
             if (! $instance instanceof TranscriptionProvider) {
@@ -181,41 +183,33 @@ class AiManager extends MultipleInstanceManager
     /**
      * Fake the responses returned by the given agent.
      */
-    public function fakeAgent(string $agent, Closure|array $responses = []): FakeProvider
+    public function fakeAgent(string $agent, Closure|array $responses = []): FakeGateway
     {
-        $this->fakeAgentProviders[$agent] = new FakeProvider(
-            $responses,
-            $this->app['events']
+        return tap(
+            new FakeGateway($responses),
+            fn ($gateway) => $this->fakeAgentGateways[$agent] = $gateway
         );
-
-        return $this->fakeAgentProviders[$agent];
     }
 
     /**
      * Determine if the given agent has been faked.
      */
-    public function hasFakeAgent(Agent|string $agent): bool
+    public function hasFakeGatewayFor(Agent|string $agent): bool
     {
         return array_key_exists(
             is_object($agent) ? get_class($agent) : $agent,
-            $this->fakeAgentProviders
+            $this->fakeAgentGateways
         );
     }
 
     /**
-     * Get a fake provider instance for the given agent.
+     * Get a fake gateway instance for the given agent.
      */
-    public function fakeProviderFor(
-        Agent $agent,
-        Provider $originalProvider,
-        string $originalModel): FakeProvider
+    public function fakeGatewayFor(Agent $agent): FakeGateway
     {
-        if (! $this->hasFakeAgent($agent)) {
-            throw new InvalidArgumentException('Agent ['.get_class($agent).'] has not been faked.');
-        }
-
-        return $this->fakeAgentProviders[get_class($agent)]
-            ->withOriginalProvider($originalProvider, $originalModel);
+        return $this->hasFakeGatewayFor($agent)
+            ? $this->fakeAgentGateways[get_class($agent)]
+            : throw new InvalidArgumentException('Agent ['.get_class($agent).'] has not been faked.');
     }
 
     /**
