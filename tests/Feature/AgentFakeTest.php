@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Exception;
 use Laravel\Ai\Responses\Data\Meta;
 use Laravel\Ai\Responses\Data\Usage;
 use Laravel\Ai\Responses\StructuredTextResponse;
@@ -109,5 +110,16 @@ class AgentFakeTest extends TestCase
         $response->each(fn () => true);
         $this->assertEquals('Third response', $response->text);
         $this->assertCount(6, $response->events);
+    }
+
+    public function test_fake_closures_can_throw_exceptions()
+    {
+        $this->expectException(Exception::class);
+
+        AssistantAgent::fake(function () {
+            throw new Exception('Something went wrong');
+        });
+
+        $response = (new AssistantAgent)->prompt('Test prompt');
     }
 }
