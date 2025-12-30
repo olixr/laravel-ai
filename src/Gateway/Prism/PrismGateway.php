@@ -199,7 +199,7 @@ class PrismGateway implements Gateway
         if ($provider instanceof AnthropicProvider) {
             $request = $request->withProviderOptions(array_filter([
                 'use_tool_calling' => $schema ? true : null,
-            ]))->withMaxTokens(50_000);
+            ]))->withMaxTokens(64_000);
         }
 
         return $request;
