@@ -23,6 +23,7 @@ The official Laravel AI SDK.
     - [Streaming](#streaming)
     - [Broadcasting](#broadcasting)
     - [Queueing](#queueing)
+    - [Middleware](#middleware)
     - [Anonymous Agents](#anonymous-agents)
 - [Images](#images)
 - [Audio (TTS)](#audio)
@@ -448,6 +449,61 @@ Route::post('/coach', function (Request $request) {
 
     return back();
 });
+```
+
+### Middleware
+
+Agents support middleware, allowing you to intercept and modify prompts before they are sent to the provider. To add middleware to an agent, implement the `HasMiddleware` interface and define a `middleware` method that returns an array of middleware classes:
+
+```php
+<?php
+
+namespace App\Ai\Agents;
+
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasMiddleware;
+use Laravel\Ai\Promptable;
+
+class SalesCoach implements Agent, HasMiddleware
+{
+    use Promptable;
+
+    // ...
+
+    /**
+     * Get the agent's middleware.
+     */
+    public function middleware(): array
+    {
+        return [
+            new LogPrompts,
+        ];
+    }
+}
+```
+
+Each middleware class should define a `handle` method that receives the `AgentPrompt` and a `Closure` to pass the prompt to the next middleware:
+
+```php
+<?php
+
+namespace App\Ai\Middleware;
+
+use Closure;
+use Laravel\Ai\Prompts\AgentPrompt;
+
+class LogPrompts
+{
+    /**
+     * Handle the incoming prompt.
+     */
+    public function handle(AgentPrompt $prompt, Closure $next)
+    {
+        Log::info('Prompting agent', ['prompt' => $prompt->prompt]);
+
+        return $next($prompt);
+    }
+}
 ```
 
 ### Anonymous Agents
