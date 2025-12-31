@@ -2,7 +2,7 @@
 
 namespace Laravel\Ai\Events;
 
-class StreamingAgent extends InvokingAgent
+class StreamingAgent extends PromptingAgent
 {
     //
 }

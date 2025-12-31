@@ -5,9 +5,9 @@ namespace Tests\Feature;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
-use Laravel\Ai\Events\AgentInvoked;
+use Laravel\Ai\Events\AgentPrompted;
 use Laravel\Ai\Events\AgentStreamed;
-use Laravel\Ai\Events\InvokingAgent;
+use Laravel\Ai\Events\PromptingAgent;
 use Laravel\Ai\Events\InvokingTool;
 use Laravel\Ai\Events\StreamingAgent;
 use Laravel\Ai\Events\ToolInvoked;
@@ -50,8 +50,8 @@ class AgentIntegrationTest extends TestCase
         $this->assertEquals($response->meta->provider, 'groq');
         $this->assertEquals($response->meta->model, 'openai/gpt-oss-20b');
 
-        Event::assertDispatched(InvokingAgent::class);
-        Event::assertDispatched(AgentInvoked::class);
+        Event::assertDispatched(PromptingAgent::class);
+        Event::assertDispatched(AgentPrompted::class);
     }
 
     public function test_ad_hoc_agents_can_be_prompted(): void

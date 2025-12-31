@@ -10,8 +10,8 @@ use Laravel\Ai\Contracts\Gateway\Gateway;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
-use Laravel\Ai\Events\AgentInvoked;
-use Laravel\Ai\Events\InvokingAgent;
+use Laravel\Ai\Events\AgentPrompted;
+use Laravel\Ai\Events\PromptingAgent;
 use Laravel\Ai\Events\InvokingTool;
 use Laravel\Ai\Events\ToolInvoked;
 use Laravel\Ai\Messages\UserMessage;
@@ -28,7 +28,7 @@ trait GeneratesText
     {
         $invocationId = (string) Str::uuid7();
 
-        $this->events->dispatch(new InvokingAgent($invocationId, $agentPrompt = new AgentPrompt(
+        $this->events->dispatch(new PromptingAgent($invocationId, $agentPrompt = new AgentPrompt(
             $agent, $prompt, $attachments, $this, $model
         )));
 
@@ -54,7 +54,7 @@ trait GeneratesText
                 ->withMessages($response->messages);
 
         $this->events->dispatch(
-            new AgentInvoked($invocationId, $agentPrompt, $response)
+            new AgentPrompted($invocationId, $agentPrompt, $response)
         );
 
         return $response;

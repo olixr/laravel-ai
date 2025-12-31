@@ -2,7 +2,7 @@
 
 namespace Laravel\Ai\Events;
 
-class AgentStreamed extends AgentInvoked
+class AgentStreamed extends AgentPrompted
 {
     //
 }

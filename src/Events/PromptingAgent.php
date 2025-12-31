@@ -4,7 +4,7 @@ namespace Laravel\Ai\Events;
 
 use Laravel\Ai\Prompts\AgentPrompt;
 
-class InvokingAgent
+class PromptingAgent
 {
     public function __construct(
         public string $invocationId,

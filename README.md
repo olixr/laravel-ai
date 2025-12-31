@@ -959,7 +959,7 @@ Embeddings::fake()->preventStrayEmbeddings();
 
 The Laravel AI SDK dispatches a variety of events, including:
 
-- `AgentInvoked`
+- `AgentPrompted`
 - `AgentStreamed`
 - `AudioGenerated`
 - `EmbeddingsGenerated`
@@ -968,8 +968,8 @@ The Laravel AI SDK dispatches a variety of events, including:
 - `GeneratingImage`
 - `GeneratingTranscription`
 - `ImageGenerated`
-- `InvokingAgent`
 - `InvokingTool`
+- `PromptingAgent`
 - `StreamingAgent`
 - `ToolInvoked`
 - `TranscriptionGenerated`

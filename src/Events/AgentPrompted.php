@@ -6,7 +6,7 @@ use Laravel\Ai\Prompts\AgentPrompt;
 use Laravel\Ai\Responses\AgentResponse;
 use Laravel\Ai\Responses\StreamedAgentResponse;
 
-class AgentInvoked
+class AgentPrompted
 {
     public function __construct(
         public string $invocationId,
