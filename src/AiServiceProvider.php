@@ -4,6 +4,7 @@ namespace Laravel\Ai;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Stringable;
+use Laravel\Ai\Console\Commands\ChatCommand;
 use Laravel\Ai\Console\Commands\MakeAgentCommand;
 use Laravel\Ai\Console\Commands\MakeToolCommand;
 
@@ -50,6 +51,7 @@ class AiServiceProvider extends ServiceProvider
     protected function registerCommands(): void
     {
         $this->commands([
+            // ChatCommand::class,
             MakeAgentCommand::class,
             MakeToolCommand::class,
         ]);
