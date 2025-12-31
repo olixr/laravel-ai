@@ -72,7 +72,7 @@ class PendingAudioGeneration
         );
 
         foreach ($providers as $provider => $model) {
-            $provider = Ai::audioProviderWithFake($provider);
+            $provider = Ai::fakeableAudioProvider($provider);
 
             $model ??= $provider->defaultAudioModel();
 

@@ -50,7 +50,7 @@ class AiManager extends MultipleInstanceManager
     /**
      * Get an audio provider instance, using a fake gateway if audio is faked.
      */
-    public function audioProviderWithFake(?string $name = null): AudioProvider
+    public function fakeableAudioProvider(?string $name = null): AudioProvider
     {
         $provider = $this->audioProvider($name);
 
@@ -74,7 +74,7 @@ class AiManager extends MultipleInstanceManager
     /**
      * Get an embedding provider instance, using a fake gateway if embeddings are faked.
      */
-    public function embeddingProviderWithFake(?string $name = null): EmbeddingProvider
+    public function fakeableEmbeddingProvider(?string $name = null): EmbeddingProvider
     {
         $provider = $this->embeddingProvider($name);
 
@@ -98,7 +98,7 @@ class AiManager extends MultipleInstanceManager
     /**
      * Get an image provider instance, using a fake gateway if images are faked.
      */
-    public function imageProviderWithFake(?string $name = null): ImageProvider
+    public function fakeableImageProvider(?string $name = null): ImageProvider
     {
         $provider = $this->imageProvider($name);
 
@@ -146,7 +146,7 @@ class AiManager extends MultipleInstanceManager
     /**
      * Get a transcription provider instance, using a fake gateway if transcriptions are faked.
      */
-    public function transcriptionProviderWithFake(?string $name = null): TranscriptionProvider
+    public function fakeableTranscriptionProvider(?string $name = null): TranscriptionProvider
     {
         $provider = $this->transcriptionProvider($name);
 

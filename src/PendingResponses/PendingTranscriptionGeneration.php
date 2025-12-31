@@ -57,7 +57,7 @@ class PendingTranscriptionGeneration
         );
 
         foreach ($providers as $provider => $model) {
-            $provider = Ai::transcriptionProviderWithFake($provider);
+            $provider = Ai::fakeableTranscriptionProvider($provider);
 
             $model ??= $provider->defaultTranscriptionModel();
 

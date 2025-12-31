@@ -40,7 +40,7 @@ class PendingEmbeddingsGeneration
         );
 
         foreach ($providers as $provider => $model) {
-            $provider = Ai::embeddingProviderWithFake($provider);
+            $provider = Ai::fakeableEmbeddingProvider($provider);
 
             $model ??= $provider->defaultEmbeddingsModel();
 
