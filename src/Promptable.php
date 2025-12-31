@@ -8,9 +8,10 @@ use Illuminate\Queue\SerializesModels;
 use Laravel\Ai\Contracts\HasMiddleware;
 use Laravel\Ai\Events\AgentFailedOver;
 use Laravel\Ai\Exceptions\FailoverableException;
-use Laravel\Ai\Gateway\FakeGateway;
+use Laravel\Ai\Gateway\FakeTextGateway;
 use Laravel\Ai\Jobs\BroadcastAgent;
 use Laravel\Ai\Jobs\InvokeAgent;
+use Laravel\Ai\Prompts\AgentPrompt;
 use Laravel\Ai\Providers\Provider;
 use Laravel\Ai\Responses\AgentResponse;
 use Laravel\Ai\Responses\QueuedAgentResponse;
@@ -58,6 +59,14 @@ trait Promptable
      */
     public function queue(string $prompt, array $attachments = [], array|string|null $provider = null, ?string $model = null): QueuedAgentResponse
     {
+        if (static::isFaked()) {
+            Ai::recordPrompt(
+                new QueuedAgentPrompt($this, $prompt, $attachments, $provider, $model),
+            );
+
+            return new QueuedAgentResponse(new FakePendingDispatch);
+        }
+
         return new QueuedAgentResponse(
             InvokeAgent::dispatch($this, $prompt, $attachments, $provider, $model)
         );
@@ -87,6 +96,14 @@ trait Promptable
      */
     public function broadcastOnQueue(string $prompt, Channel|array $channels, array $attachments = [], ?string $provider = null, ?string $model = null): QueuedAgentResponse
     {
+        if (static::isFaked()) {
+            Ai::recordPrompt(
+                new QueuedAgentPrompt($this, $prompt, $attachments, $provider, $model),
+            );
+
+            return new QueuedAgentResponse(new FakePendingDispatch);
+        }
+
         return new QueuedAgentResponse(
             BroadcastAgent::dispatch($this, $prompt, $channels, $attachments, $provider, $model)
         );
@@ -164,7 +181,7 @@ trait Promptable
     /**
      * Fake the responses returned by the agent.
      */
-    public static function fake(Closure|array $responses = []): FakeGateway
+    public static function fake(Closure|array $responses = []): FakeTextGateway
     {
         return Ai::fakeAgent(static::class, $responses);
     }
@@ -174,7 +191,47 @@ trait Promptable
      */
     public static function assertPrompted(Closure|string $callback): void
     {
-        Ai::assertPrompted(static::class, $callback);
+        Ai::assertAgentWasPrompted(static::class, $callback);
+    }
+
+    /**
+     * Assert that a prompt was not received matching a given truth test.
+     */
+    public static function assertNotPrompted(Closure|string $callback): void
+    {
+        Ai::assertAgentNotPrompted(static::class, $callback);
+    }
+
+    /**
+     * Assert that no prompts were received.
+     */
+    public static function assertNeverPrompted(): void
+    {
+        Ai::assertAgentNeverPrompted(static::class);
+    }
+
+    /**
+     * Assert that a queued prompt was received matching a given truth test.
+     */
+    public static function assertQueued(Closure|string $callback): void
+    {
+        Ai::assertAgentWasQueued(static::class, $callback);
+    }
+
+    /**
+     * Assert that a queued prompt was not received matching a given truth test.
+     */
+    public static function assertNotQueued(Closure|string $callback): void
+    {
+        Ai::assertAgentNotQueued(static::class, $callback);
+    }
+
+    /**
+     * Assert that no queued prompts were received.
+     */
+    public static function assertNeverQueued(): void
+    {
+        Ai::assertAgentNeverQueued(static::class);
     }
 
     /**

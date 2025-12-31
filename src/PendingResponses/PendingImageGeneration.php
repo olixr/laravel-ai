@@ -5,10 +5,12 @@ namespace Laravel\Ai\PendingResponses;
 use Laravel\Ai\Ai;
 use Laravel\Ai\Events\ProviderFailedOver;
 use Laravel\Ai\Exceptions\FailoverableException;
+use Laravel\Ai\FakePendingDispatch;
 use Laravel\Ai\Jobs\GenerateImage;
 use Laravel\Ai\Messages\Attachments\LocalImage;
 use Laravel\Ai\Messages\Attachments\StoredImage;
 use Laravel\Ai\Providers\Provider;
+use Laravel\Ai\Prompts\QueuedImagePrompt;
 use Laravel\Ai\Responses\ImageResponse;
 use Laravel\Ai\Responses\QueuedImageResponse;
 use LogicException;
@@ -101,7 +103,7 @@ class PendingImageGeneration
         );
 
         foreach ($providers as $provider => $model) {
-            $provider = Ai::imageProvider($provider);
+            $provider = Ai::imageProviderWithFake($provider);
 
             $model ??= $provider->defaultImageModel();
 
@@ -125,6 +127,21 @@ class PendingImageGeneration
     public function queue(array|string|null $provider = null, ?string $model = null): QueuedImageResponse
     {
         $this->ensureAttachmentsAreQueueable();
+
+        if (Ai::imagesAreFaked()) {
+            Ai::recordImageGeneration(
+                new QueuedImagePrompt(
+                    $this->prompt,
+                    $this->attachments,
+                    $this->size,
+                    $this->quality,
+                    $provider,
+                    $model
+                )
+            );
+
+            return new QueuedImageResponse(new FakePendingDispatch);
+        }
 
         return new QueuedImageResponse(
             GenerateImage::dispatch($this, $provider, $model),

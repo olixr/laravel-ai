@@ -3,7 +3,8 @@
 namespace Tests\Feature;
 
 use Exception;
-use Laravel\Ai\AgentPrompt;
+use Laravel\Ai\Prompts\AgentPrompt;
+use Laravel\Ai\QueuedAgentPrompt;
 use Laravel\Ai\Responses\Data\Meta;
 use Laravel\Ai\Responses\Data\Usage;
 use Laravel\Ai\Responses\StructuredTextResponse;
@@ -32,11 +33,20 @@ class AgentFakeTest extends TestCase
         $response = (new AssistantAgent)->prompt('Third prompt');
         $this->assertEquals('Third response', $response->text);
 
+        // Assertion tests...
         AssistantAgent::assertPrompted('First prompt');
+        AssistantAgent::assertNotPrompted('Missing prompt');
 
         AssistantAgent::assertPrompted(function (AgentPrompt $prompt) {
             return $prompt->prompt === 'First prompt';
         });
+    }
+
+    public function test_can_assert_agent_was_never_prompted()
+    {
+        AssistantAgent::fake();
+
+        AssistantAgent::assertNeverPrompted();
     }
 
     public function test_agents_can_be_faked_with_no_predefined_responses(): void
@@ -117,6 +127,31 @@ class AgentFakeTest extends TestCase
         $response->each(fn () => true);
         $this->assertEquals('Third response', $response->text);
         $this->assertCount(6, $response->events);
+    }
+
+    public function test_queued_agents_can_be_faked()
+    {
+        AssistantAgent::fake();
+
+        (new AssistantAgent)->queue('First prompt');
+
+        AssistantAgent::assertQueued('First prompt');
+        AssistantAgent::assertNotQueued('Second prompt');
+
+        AssistantAgent::assertQueued(function (QueuedAgentPrompt $prompt) {
+            return $prompt->prompt === 'First prompt';
+        });
+
+        AssistantAgent::assertNotQueued(function (QueuedAgentPrompt $prompt) {
+            return $prompt->prompt === 'Second prompt';
+        });
+    }
+
+    public function test_can_assert_agent_was_never_queued()
+    {
+        AssistantAgent::fake();
+
+        AssistantAgent::assertNeverQueued();
     }
 
     public function test_fake_closures_can_throw_exceptions()

@@ -2,19 +2,14 @@
 
 namespace Laravel\Ai;
 
-use Closure;
 use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Support\Collection;
 use Illuminate\Support\MultipleInstanceManager;
-use InvalidArgumentException;
-use Laravel\Ai\AgentPrompt;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Providers\AudioProvider;
 use Laravel\Ai\Contracts\Providers\EmbeddingProvider;
 use Laravel\Ai\Contracts\Providers\ImageProvider;
 use Laravel\Ai\Contracts\Providers\TextProvider;
 use Laravel\Ai\Contracts\Providers\TranscriptionProvider;
-use Laravel\Ai\Gateway\FakeGateway;
 use Laravel\Ai\Gateway\Prism\PrismGateway;
 use Laravel\Ai\Providers\AnthropicProvider;
 use Laravel\Ai\Providers\ElevenLabsProvider;
@@ -24,19 +19,14 @@ use Laravel\Ai\Providers\OpenAiProvider;
 use Laravel\Ai\Providers\Provider;
 use Laravel\Ai\Providers\XaiProvider;
 use LogicException;
-use PHPUnit\Framework\Assert as PHPUnit;
 
 class AiManager extends MultipleInstanceManager
 {
-    /**
-     * All of the registered fake agent gateways.
-     */
-    protected array $fakeAgentGateways = [];
-
-    /**
-     * All of the recorded agent prompts.
-     */
-    protected array $recorded = [];
+    use Concerns\InteractsWithFakeAgents;
+    use Concerns\InteractsWithFakeAudio;
+    use Concerns\InteractsWithFakeEmbeddings;
+    use Concerns\InteractsWithFakeImages;
+    use Concerns\InteractsWithFakeTranscriptions;
 
     /**
      * The key name of the "driver" equivalent configuration option.
@@ -58,6 +48,18 @@ class AiManager extends MultipleInstanceManager
     }
 
     /**
+     * Get an audio provider instance, using a fake gateway if audio is faked.
+     */
+    public function audioProviderWithFake(?string $name = null): AudioProvider
+    {
+        $provider = $this->audioProvider($name);
+
+        return $this->audioIsFaked()
+            ? (clone $provider)->useAudioGateway($this->fakeAudioGateway())
+            : $provider;
+    }
+
+    /**
      * Get a provider instance by name.
      */
     public function embeddingProvider(?string $name = null): EmbeddingProvider
@@ -70,6 +72,18 @@ class AiManager extends MultipleInstanceManager
     }
 
     /**
+     * Get an embedding provider instance, using a fake gateway if embeddings are faked.
+     */
+    public function embeddingProviderWithFake(?string $name = null): EmbeddingProvider
+    {
+        $provider = $this->embeddingProvider($name);
+
+        return $this->embeddingsAreFaked()
+            ? (clone $provider)->useEmbeddingGateway($this->fakeEmbeddingGateway())
+            : $provider;
+    }
+
+    /**
      * Get a provider instance by name.
      */
     public function imageProvider(?string $name = null): ImageProvider
@@ -79,6 +93,18 @@ class AiManager extends MultipleInstanceManager
                 throw new LogicException('Provider ['.get_class($instance).'] does not support image generation.');
             }
         });
+    }
+
+    /**
+     * Get an image provider instance, using a fake gateway if images are faked.
+     */
+    public function imageProviderWithFake(?string $name = null): ImageProvider
+    {
+        $provider = $this->imageProvider($name);
+
+        return $this->imagesAreFaked()
+            ? (clone $provider)->useImageGateway($this->fakeImageGateway())
+            : $provider;
     }
 
     /**
@@ -115,6 +141,18 @@ class AiManager extends MultipleInstanceManager
                 throw new LogicException('Provider ['.get_class($instance).'] does not support transcription generation.');
             }
         });
+    }
+
+    /**
+     * Get a transcription provider instance, using a fake gateway if transcriptions are faked.
+     */
+    public function transcriptionProviderWithFake(?string $name = null): TranscriptionProvider
+    {
+        $provider = $this->transcriptionProvider($name);
+
+        return $this->transcriptionsAreFaked()
+            ? (clone $provider)->useTranscriptionGateway($this->fakeTranscriptionGateway())
+            : $provider;
     }
 
     /**
@@ -186,67 +224,6 @@ class AiManager extends MultipleInstanceManager
             $config,
             $this->app->make(Dispatcher::class)
         );
-    }
-
-    /**
-     * Fake the responses returned by the given agent.
-     */
-    public function fakeAgent(string $agent, Closure|array $responses = []): FakeGateway
-    {
-        return tap(
-            new FakeGateway($responses),
-            fn ($gateway) => $this->fakeAgentGateways[$agent] = $gateway
-        );
-    }
-
-    /**
-     * Determine if the given agent has been faked.
-     */
-    public function hasFakeGatewayFor(Agent|string $agent): bool
-    {
-        return array_key_exists(
-            is_object($agent) ? get_class($agent) : $agent,
-            $this->fakeAgentGateways
-        );
-    }
-
-    /**
-     * Get a fake gateway instance for the given agent.
-     */
-    public function fakeGatewayFor(Agent $agent): FakeGateway
-    {
-        return $this->hasFakeGatewayFor($agent)
-            ? $this->fakeAgentGateways[get_class($agent)]
-            : throw new InvalidArgumentException('Agent ['.get_class($agent).'] has not been faked.');
-    }
-
-    /**
-     * Record the given prompt for the faked agent.
-     */
-    public function recordPrompt(AgentPrompt $prompt): self
-    {
-        $this->recorded[get_class($prompt->agent)][] = $prompt;
-
-        return $this;
-    }
-
-    /**
-     * Assert that a prompt was received matching a given truth test.
-     */
-    public function assertPrompted(string $agent, Closure|string $callback): self
-    {
-        $callback = is_string($callback)
-            ? fn ($prompt) => $prompt->prompt === $callback
-            : $callback;
-
-        PHPUnit::assertTrue(
-            (new Collection($this->recorded[$agent] ?? []))->filter(function ($prompt) use ($callback) {
-                return $callback($prompt);
-            })->count() > 0,
-            'An expected prompt was not received.'
-        );
-
-        return $this;
     }
 
     /**
