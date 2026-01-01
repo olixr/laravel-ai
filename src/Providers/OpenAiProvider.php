@@ -27,7 +27,7 @@ class OpenAiProvider extends Provider implements AudioProvider, EmbeddingProvide
      */
     public function defaultTextModel(): string
     {
-        return 'gpt-5-mini';
+        return 'gpt-5.2';
     }
 
     /**
