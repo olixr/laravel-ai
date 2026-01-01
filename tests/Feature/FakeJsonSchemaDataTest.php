@@ -28,11 +28,11 @@ class FakeJsonSchemaDataTest extends TestCase
             'active' => $schema->boolean(),
         ]))->withoutAdditionalProperties());
 
-        $this->assertTrue(is_string($response['name']));
-        $this->assertTrue(is_numeric($response['age']));
-        $this->assertTrue(is_array($response['address']));
-        $this->assertTrue(in_array($response['role'], ['admin', 'editor']));
+        $this->assertIsString($response['name']);
+        $this->assertIsNumeric($response['age']);
+        $this->assertIsArray($response['address']);
+        $this->assertContains($response['role'], ['admin', 'editor']);
         $this->assertTrue(array_is_list($response['skills']));
-        $this->assertTrue(is_bool($response['active']));
+        $this->assertIsBool($response['active']);
     }
 }
