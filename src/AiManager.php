@@ -16,6 +16,7 @@ use Laravel\Ai\Providers\ElevenLabsProvider;
 use Laravel\Ai\Providers\GeminiProvider;
 use Laravel\Ai\Providers\GroqProvider;
 use Laravel\Ai\Providers\OpenAiProvider;
+use Laravel\Ai\Providers\OpenRouterProvider;
 use Laravel\Ai\Providers\Provider;
 use Laravel\Ai\Providers\XaiProvider;
 use LogicException;
@@ -208,6 +209,18 @@ class AiManager extends MultipleInstanceManager
     public function createOpenaiDriver(array $config): OpenAiProvider
     {
         return new OpenAiProvider(
+            new PrismGateway($this->app['events']),
+            $config,
+            $this->app->make(Dispatcher::class)
+        );
+    }
+
+    /**
+     * Create an OpenRouter powered instance.
+     */
+    public function createOpenrouterDriver(array $config): OpenRouterProvider
+    {
+        return new OpenRouterProvider(
             new PrismGateway($this->app['events']),
             $config,
             $this->app->make(Dispatcher::class)

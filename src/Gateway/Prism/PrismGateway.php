@@ -412,11 +412,12 @@ class PrismGateway implements Gateway
     protected static function toPrismProvider(Provider $provider): PrismProvider
     {
         return match ($provider->driver()) {
-            'openai' => PrismProvider::OpenAI,
             'anthropic' => PrismProvider::Anthropic,
             'gemini' => PrismProvider::Gemini,
-            'xai' => PrismProvider::XAI,
             'groq' => PrismProvider::Groq,
+            'openai' => PrismProvider::OpenAI,
+            'openrouter' => PrismProvider::OpenRouter,
+            'xai' => PrismProvider::XAI,
             default => throw new InvalidArgumentException('Gateway does not support provider ['.$provider.'].'),
         };
     }
