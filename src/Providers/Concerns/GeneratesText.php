@@ -14,6 +14,7 @@ use Laravel\Ai\Events\AgentPrompted;
 use Laravel\Ai\Events\InvokingTool;
 use Laravel\Ai\Events\PromptingAgent;
 use Laravel\Ai\Events\ToolInvoked;
+use Laravel\Ai\Gateway\TextGenerationOptions;
 use Laravel\Ai\Messages\UserMessage;
 use Laravel\Ai\Prompts\AgentPrompt;
 use Laravel\Ai\Responses\AgentResponse;
@@ -45,6 +46,7 @@ trait GeneratesText
             $messages,
             $agent instanceof HasTools ? $agent->tools() : [],
             $agent instanceof HasStructuredOutput ? $agent->schema(new JsonSchemaTypeFactory) : null,
+            TextGenerationOptions::forAgent($agent),
         );
 
         $response = $agent instanceof HasStructuredOutput

@@ -45,7 +45,8 @@ class FakeTextGateway implements TextGateway
         ?string $instructions,
         array $messages = [],
         array $tools = [],
-        ?array $schema = null
+        ?array $schema = null,
+        ?TextGenerationOptions $options = null,
     ): TextResponse {
         $message = (new Collection($messages))->last(function ($message) {
             return $message instanceof UserMessage;
@@ -68,7 +69,8 @@ class FakeTextGateway implements TextGateway
         ?string $instructions,
         array $messages = [],
         array $tools = [],
-        ?array $schema = null
+        ?array $schema = null,
+        ?TextGenerationOptions $options = null,
     ): Generator {
         $messageId = ulid();
 

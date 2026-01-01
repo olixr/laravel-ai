@@ -5,6 +5,7 @@ namespace Laravel\Ai\Contracts\Gateway;
 use Closure;
 use Generator;
 use Laravel\Ai\Contracts\Providers\TextProvider;
+use Laravel\Ai\Gateway\TextGenerationOptions;
 use Laravel\Ai\Responses\TextResponse;
 
 interface TextGateway
@@ -20,7 +21,8 @@ interface TextGateway
         ?string $instructions,
         array $messages = [],
         array $tools = [],
-        ?array $schema = null
+        ?array $schema = null,
+        ?TextGenerationOptions $options = null,
     ): TextResponse;
 
     /**
@@ -35,7 +37,8 @@ interface TextGateway
         ?string $instructions,
         array $messages = [],
         array $tools = [],
-        ?array $schema = null
+        ?array $schema = null,
+        ?TextGenerationOptions $options = null,
     ): Generator;
 
     /**

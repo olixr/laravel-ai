@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Laravel\Ai\Contracts\Gateway\Gateway;
 use Laravel\Ai\Contracts\Prompt;
+use Laravel\Ai\Gateway\TextGenerationOptions;
 use Laravel\Ai\Contracts\Providers\AudioProvider;
 use Laravel\Ai\Contracts\Providers\EmbeddingProvider;
 use Laravel\Ai\Contracts\Providers\ImageProvider;
@@ -65,9 +66,10 @@ class PrismGateway implements Gateway
         array $messages = [],
         array $tools = [],
         ?array $schema = null,
+        ?TextGenerationOptions $options = null,
     ): TextResponse {
         [$request, $structured] = [
-            $this->createPrismTextRequest($provider, $model, $schema),
+            $this->createPrismTextRequest($provider, $model, $schema, $options),
             ! empty($schema),
         ];
 
@@ -76,7 +78,7 @@ class PrismGateway implements Gateway
         }
 
         if (count($tools) > 0) {
-            $this->addTools($request, $tools);
+            $this->addTools($request, $tools, $options);
         }
 
         try {
@@ -115,9 +117,10 @@ class PrismGateway implements Gateway
         array $messages = [],
         array $tools = [],
         ?array $schema = null,
+        ?TextGenerationOptions $options = null,
     ): Generator {
         [$request, $structured] = [
-            $this->createPrismTextRequest($provider, $model, $schema),
+            $this->createPrismTextRequest($provider, $model, $schema, $options),
             ! empty($schema),
         ];
 
@@ -126,7 +129,7 @@ class PrismGateway implements Gateway
         }
 
         if (count($tools) > 0) {
-            $this->addTools($request, $tools);
+            $this->addTools($request, $tools, $options);
         }
 
         try {
@@ -149,7 +152,7 @@ class PrismGateway implements Gateway
     /**
      * Add the given tools to the Prism request.
      */
-    protected function addTools($request, array $tools)
+    protected function addTools($request, array $tools, ?TextGenerationOptions $options = null)
     {
         return $request
             ->withTools(collect($tools)->map(function ($tool) {
@@ -174,13 +177,13 @@ class PrismGateway implements Gateway
                     ->withoutErrorHandling();
             })->all())
             ->withToolChoice(ToolChoice::Auto)
-            ->withMaxSteps(round(count($tools) * 1.5));
+            ->withMaxSteps($options?->maxSteps ?? round(count($tools) * 1.5));
     }
 
     /**
      * Create a Prism text request for the given provider, model, and prompt.
      */
-    protected function createPrismTextRequest(Provider $provider, string $model, ?array $schema)
+    protected function createPrismTextRequest(Provider $provider, string $model, ?array $schema, ?TextGenerationOptions $options = null)
     {
         $request = tap(
             ! empty($schema) ? Prism::structured() : Prism::text(),
@@ -204,7 +207,13 @@ class PrismGateway implements Gateway
         if ($provider instanceof AnthropicProvider) {
             $request = $request->withProviderOptions(array_filter([
                 'use_tool_calling' => $schema ? true : null,
-            ]))->withMaxTokens(64_000);
+            ]))->withMaxTokens($options?->maxTokens ?? 64_000);
+        } elseif (! is_null($options?->maxTokens)) {
+            $request = $request->withMaxTokens($options->maxTokens);
+        }
+
+        if (! is_null($options?->temperature)) {
+            $request = $request->usingTemperature($options->temperature);
         }
 
         return $request;
