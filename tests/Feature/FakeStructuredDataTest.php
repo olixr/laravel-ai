@@ -6,7 +6,7 @@ use Illuminate\JsonSchema\JsonSchemaTypeFactory;
 use Illuminate\JsonSchema\Types\ObjectType;
 use Tests\TestCase;
 
-use function Laravel\Ai\fake;
+use function Laravel\Ai\generate_fake_data_for_json_schema_type;
 
 class FakeStructuredDataTest extends TestCase
 {
@@ -28,7 +28,7 @@ class FakeStructuredDataTest extends TestCase
             'active' => $schema->boolean(),
         ]))->withoutAdditionalProperties();
 
-        $fake = fake($object);
+        $fake = generate_fake_data_for_json_schema_type($object);
 
         $this->assertTrue(is_string($fake['name']));
         $this->assertTrue(is_numeric($fake['age']));
