@@ -4,6 +4,7 @@ namespace Laravel\Ai\Gateway;
 
 use Closure;
 use Generator;
+use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Ai\Contracts\Gateway\TextGateway;
@@ -20,6 +21,7 @@ use Laravel\Ai\Streaming\Events\TextEnd;
 use Laravel\Ai\Streaming\Events\TextStart;
 use RuntimeException;
 
+use function Laravel\Ai\generate_fake_data_for_json_schema_type;
 use function Laravel\Ai\ulid;
 
 class FakeTextGateway implements TextGateway
@@ -131,11 +133,9 @@ class FakeTextGateway implements TextGateway
                 throw new RuntimeException('Attempted prompt ['.Str::words($prompt, 10).'] without a fake agent response.');
             }
 
-            if (! is_null($schema)) {
-                throw new RuntimeException('Unable to automatically generate fake responses for structured output.');
-            }
-
-            $response = 'Fake response for prompt: '.Str::words($prompt, 10);
+            $response = is_null($schema)
+                ? 'Fake response for prompt: '.Str::words($prompt, 10)
+                : generate_fake_data_for_json_schema_type(new ObjectType($schema));
         }
 
         return match (true) {

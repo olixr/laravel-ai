@@ -105,6 +105,15 @@ class AgentFakeTest extends TestCase
         $this->assertEquals('Pb', $response['symbol']);
     }
 
+    public function test_agents_with_structured_output_can_be_faked_with_no_predefined_responses()
+    {
+        StructuredAgent::fake();
+
+        $response = (new StructuredAgent)->prompt('Gold prompt');
+
+        $this->assertTrue(is_string($response['symbol']));
+    }
+
     public function test_agent_streams_can_be_faked(): void
     {
         AssistantAgent::fake([

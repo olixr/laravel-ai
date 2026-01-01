@@ -4,8 +4,11 @@ namespace Laravel\Ai\Console\Commands;
 
 use Illuminate\Console\Command;
 use Laravel\Ai\Responses\StructuredAgentResponse;
-use function Laravel\Ai\{agent};
-use function Laravel\Prompts\{note, spin, textarea};
+
+use function Laravel\Ai\agent;
+use function Laravel\Prompts\note;
+use function Laravel\Prompts\spin;
+use function Laravel\Prompts\textarea;
 
 class ChatCommand extends Command
 {
