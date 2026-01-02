@@ -5,6 +5,14 @@ namespace Laravel\Ai\Files;
 abstract class Document extends File
 {
     /**
+     * Create a new document from Base64 data.
+     */
+    public static function fromBase64(string $base64, ?string $mime = null): Base64Document
+    {
+        return new Base64Document($base64, $mime);
+    }
+
+    /**
      * Create a new provider document using the document with the given ID.
      */
     public static function fromId(string $id): ProviderDocument

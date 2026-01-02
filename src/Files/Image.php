@@ -5,6 +5,14 @@ namespace Laravel\Ai\Files;
 abstract class Image extends File
 {
     /**
+     * Create a new image from Base64 data.
+     */
+    public static function fromBase64(string $base64, ?string $mime = null): Base64Image
+    {
+        return new Base64Image($base64, $mime);
+    }
+
+    /**
      * Create a new provider image using the image with the given ID.
      */
     public static function fromId(string $id): ProviderImage
