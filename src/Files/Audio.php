@@ -1,11 +1,11 @@
 <?php
 
-namespace Laravel\Ai\Messages\Attachments;
+namespace Laravel\Ai\Files;
 
-abstract class Audio extends Attachment
+abstract class Audio extends File
 {
     /**
-     * Create a new audio attachment from Base64 data.
+     * Create a new audio from Base64 data.
      */
     public static function fromBase64(string $base64, ?string $mime = null): Base64Audio
     {
@@ -13,7 +13,7 @@ abstract class Audio extends Attachment
     }
 
     /**
-     * Create a new audio attachment using the audio at the given path.
+     * Create a new audio using the audio at the given path.
      */
     public static function fromPath(string $path, ?string $mime = null): LocalAudio
     {
@@ -21,7 +21,7 @@ abstract class Audio extends Attachment
     }
 
     /**
-     * Create a new stored audio attachment using the audio at the given path on the given disk.
+     * Create a new stored audio using the audio at the given path on the given disk.
      */
     public static function fromStorage(string $path, ?string $disk = null): StoredAudio
     {

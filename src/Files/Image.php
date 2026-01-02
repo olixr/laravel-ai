@@ -1,11 +1,11 @@
 <?php
 
-namespace Laravel\Ai\Messages\Attachments;
+namespace Laravel\Ai\Files;
 
-abstract class Image extends Attachment
+abstract class Image extends File
 {
     /**
-     * Create a new provider image attachment using the image with the given ID.
+     * Create a new provider image using the image with the given ID.
      */
     public static function fromId(string $id): ProviderImage
     {
@@ -13,7 +13,7 @@ abstract class Image extends Attachment
     }
 
     /**
-     * Create a new image attachment using the image at the given path.
+     * Create a new image using the image at the given path.
      */
     public static function fromPath(string $path, ?string $mime = null): LocalImage
     {
@@ -21,7 +21,7 @@ abstract class Image extends Attachment
     }
 
     /**
-     * Create a new remote image attachment using the image at the given URL.
+     * Create a new remote image using the image at the given URL.
      */
     public static function fromUrl(string $url): RemoteImage
     {
@@ -29,7 +29,7 @@ abstract class Image extends Attachment
     }
 
     /**
-     * Create a new stored image attachment using the image at the given path on the given disk.
+     * Create a new stored image using the image at the given path on the given disk.
      */
     public static function fromStorage(string $path, ?string $disk = null): StoredImage
     {

@@ -17,11 +17,11 @@ use Laravel\Ai\Contracts\Providers\EmbeddingProvider;
 use Laravel\Ai\Contracts\Providers\ImageProvider;
 use Laravel\Ai\Contracts\Providers\TextProvider;
 use Laravel\Ai\Contracts\Providers\TranscriptionProvider;
-use Laravel\Ai\Messages\Attachments\Attachment;
-use Laravel\Ai\Messages\Attachments\Image as ImageAttachment;
-use Laravel\Ai\Messages\Attachments\LocalImage;
-use Laravel\Ai\Messages\Attachments\StoredImage;
-use Laravel\Ai\Messages\Attachments\TranscribableAudio;
+use Laravel\Ai\Files\File;
+use Laravel\Ai\Files\Image as ImageFile;
+use Laravel\Ai\Files\LocalImage;
+use Laravel\Ai\Files\StoredImage;
+use Laravel\Ai\Files\TranscribableAudio;
 use Laravel\Ai\Messages\Message;
 use Laravel\Ai\ObjectSchema;
 use Laravel\Ai\Providers\AnthropicProvider;
@@ -230,7 +230,7 @@ class PrismGateway implements Gateway
     /**
      * Generate an image.
      *
-     * @param  array<ImageAttachment>  $attachments
+     * @param  array<ImageFile>  $attachments
      * @param  '3:2'|'2:3'|'1:1'  $size
      * @param  'low'|'medium'|'high'  $quality
      */
@@ -270,7 +270,7 @@ class PrismGateway implements Gateway
     protected function toPrismImageAttachments(array $attachments): array
     {
         return collect($attachments)->map(function ($attachment) {
-            if (! $attachment instanceof Attachment && ! $attachment instanceof UploadedFile) {
+            if (! $attachment instanceof File && ! $attachment instanceof UploadedFile) {
                 throw new InvalidArgumentException(
                     'Unsupported attachment type ['.get_class($attachment).']'
                 );
@@ -283,7 +283,7 @@ class PrismGateway implements Gateway
                 default => throw new InvalidArgumentException('Unsupported attachment type ['.get_class($attachment).']'),
             };
 
-            if ($attachment instanceof Attachment && $attachment->name) {
+            if ($attachment instanceof File && $attachment->name) {
                 $prismAttachment->as($attachment->name);
             }
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace Laravel\Ai\Messages\Attachments;
+namespace Laravel\Ai\Files;
 
-abstract class Attachment
+abstract class File
 {
     public ?string $name = null;
 
     /**
-     * Set the attachment's name.
+     * Set the file's name.
      */
     public function as(string $name): static
     {

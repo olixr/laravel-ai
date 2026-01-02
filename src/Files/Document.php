@@ -1,11 +1,11 @@
 <?php
 
-namespace Laravel\Ai\Messages\Attachments;
+namespace Laravel\Ai\Files;
 
-abstract class Document extends Attachment
+abstract class Document extends File
 {
     /**
-     * Create a new provider document attachment using the document with the given ID.
+     * Create a new provider document using the document with the given ID.
      */
     public static function fromId(string $id): ProviderDocument
     {
@@ -13,7 +13,7 @@ abstract class Document extends Attachment
     }
 
     /**
-     * Create a new document attachment using the document at the given path.
+     * Create a new document using the document at the given path.
      */
     public static function fromPath(string $path): LocalDocument
     {
@@ -21,7 +21,7 @@ abstract class Document extends Attachment
     }
 
     /**
-     * Create a new remote document attachment using the document at the given URL.
+     * Create a new remote document using the document at the given URL.
      */
     public static function fromUrl(string $url): RemoteDocument
     {
@@ -29,7 +29,7 @@ abstract class Document extends Attachment
     }
 
     /**
-     * Create a new stored document attachment using the document at the given path on the given disk.
+     * Create a new stored document using the document at the given path on the given disk.
      */
     public static function fromStorage(string $path, ?string $disk = null): StoredDocument
     {

@@ -6,15 +6,15 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Laravel\Ai\Messages\AssistantMessage;
-use Laravel\Ai\Messages\Attachments\Attachment;
-use Laravel\Ai\Messages\Attachments\LocalDocument;
-use Laravel\Ai\Messages\Attachments\LocalImage;
-use Laravel\Ai\Messages\Attachments\ProviderDocument;
-use Laravel\Ai\Messages\Attachments\ProviderImage;
-use Laravel\Ai\Messages\Attachments\RemoteDocument;
-use Laravel\Ai\Messages\Attachments\RemoteImage;
-use Laravel\Ai\Messages\Attachments\StoredDocument;
-use Laravel\Ai\Messages\Attachments\StoredImage;
+use Laravel\Ai\Files\File;
+use Laravel\Ai\Files\LocalDocument;
+use Laravel\Ai\Files\LocalImage;
+use Laravel\Ai\Files\ProviderDocument;
+use Laravel\Ai\Files\ProviderImage;
+use Laravel\Ai\Files\RemoteDocument;
+use Laravel\Ai\Files\RemoteImage;
+use Laravel\Ai\Files\StoredDocument;
+use Laravel\Ai\Files\StoredImage;
 use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Messages\MessageRole;
 use Laravel\Ai\Messages\ToolResultMessage;
@@ -56,7 +56,7 @@ class PrismMessages
     protected static function fromLaravelAttachments(Collection $attachments): Collection
     {
         return $attachments->map(function ($attachment) {
-            if (! $attachment instanceof Attachment && ! $attachment instanceof UploadedFile) {
+            if (! $attachment instanceof File && ! $attachment instanceof UploadedFile) {
                 throw new InvalidArgumentException(
                     'Unsupported attachment type ['.get_class($attachment).']'
                 );
@@ -76,7 +76,7 @@ class PrismMessages
                 $attachment instanceof UploadedFile => PrismDocument::fromBase64(base64_encode($attachment->get()), $attachment->getClientMimeType()),
             };
 
-            if ($attachment instanceof Attachment && $attachment->name) {
+            if ($attachment instanceof File && $attachment->name) {
                 $prismAttachment->as($attachment->name);
             }
 

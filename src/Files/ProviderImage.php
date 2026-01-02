@@ -1,6 +1,6 @@
 <?php
 
-namespace Laravel\Ai\Messages\Attachments;
+namespace Laravel\Ai\Files;
 
 class ProviderImage extends Image
 {

@@ -3,7 +3,7 @@
 namespace Laravel\Ai\Prompts;
 
 use Illuminate\Http\UploadedFile;
-use Laravel\Ai\Messages\Attachments\TranscribableAudio;
+use Laravel\Ai\Files\TranscribableAudio;
 
 class QueuedTranscriptionPrompt
 {

@@ -4,7 +4,7 @@ namespace Laravel\Ai\Contracts\Gateway;
 
 use Illuminate\Http\UploadedFile;
 use Laravel\Ai\Contracts\Providers\TranscriptionProvider;
-use Laravel\Ai\Messages\Attachments\TranscribableAudio;
+use Laravel\Ai\Files\TranscribableAudio;
 use Laravel\Ai\Responses\TranscriptionResponse;
 
 interface TranscriptionGateway

@@ -7,8 +7,8 @@ use Laravel\Ai\Events\ProviderFailedOver;
 use Laravel\Ai\Exceptions\FailoverableException;
 use Laravel\Ai\FakePendingDispatch;
 use Laravel\Ai\Jobs\GenerateImage;
-use Laravel\Ai\Messages\Attachments\LocalImage;
-use Laravel\Ai\Messages\Attachments\StoredImage;
+use Laravel\Ai\Files\LocalImage;
+use Laravel\Ai\Files\StoredImage;
 use Laravel\Ai\Prompts\QueuedImagePrompt;
 use Laravel\Ai\Providers\Provider;
 use Laravel\Ai\Responses\ImageResponse;
@@ -30,7 +30,7 @@ class PendingImageGeneration
     /**
      * Provide the reference images that should be sent with the request.
      *
-     * @param  array<\Laravel\Ai\Messages\Attachments\Image>  $attachments
+     * @param  array<\Laravel\Ai\Files\Image>  $attachments
      */
     public function attachments(array $attachments): self
     {

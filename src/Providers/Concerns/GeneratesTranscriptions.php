@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 use Laravel\Ai\Ai;
 use Laravel\Ai\Events\GeneratingTranscription;
 use Laravel\Ai\Events\TranscriptionGenerated;
-use Laravel\Ai\Messages\Attachments\TranscribableAudio;
+use Laravel\Ai\Files\TranscribableAudio;
 use Laravel\Ai\Prompts\TranscriptionPrompt;
 use Laravel\Ai\Responses\TranscriptionResponse;
 

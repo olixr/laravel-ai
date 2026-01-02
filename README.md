@@ -326,29 +326,29 @@ When prompting, you may also pass attachments with the prompt to allow the model
 
 ```php
 use App\Ai\Agents\SalesCoach;
-use Laravel\Ai\Messages\Attachments\Document;
+use Laravel\Ai\Files;
 
 $response = (new SalesCoach)->prompt(
     'Analyze the attached sales transcript...'
     attachments: [
-        Document::fromStorage('transcript.pdf') // Attach a document from a filesystem disk...
-        Document::fromPath('/home/laravel/transcript.md') // Attach a document from a local path...
+        Files\Document::fromStorage('transcript.pdf') // Attach a document from a filesystem disk...
+        Files\Document::fromPath('/home/laravel/transcript.md') // Attach a document from a local path...
         $request->file('transcript'), // Attach an uploaded file...
     ]
 );
 ```
 
-Likewise, the `Laravel\Ai\Messages\Attachments\Image` class may be used to attach images to a prompt:
+Likewise, the `Laravel\Ai\Files\Image` class may be used to attach images to a prompt:
 
 ```php
 use App\Ai\Agents\ImageAnalyzer;
-use Laravel\Ai\Messages\Attachments\Image;
+use Laravel\Ai\Files;
 
 $response = (new ImageAnalyzer)->prompt(
     'What is in this image?'
     attachments: [
-        Image::fromStorage('photo.jpg') // Attach an image from a filesystem disk...
-        Image::fromPath('/home/laravel/photo.jpg') // Attach an image from a local path...
+        Files\Image::fromStorage('photo.jpg') // Attach an image from a filesystem disk...
+        Files\Image::fromPath('/home/laravel/photo.jpg') // Attach an image from a local path...
         $request->file('photo'), // Attach an uploaded file...
     ]
 );
@@ -591,12 +591,12 @@ $image = Image::of('A donut sitting on the kitchen counter')
 You may attach reference images using the `attachments` method:
 
 ```php
+use Laravel\Ai\Files;
 use Laravel\Ai\Image;
-use Laravel\Ai\Messages\Attachments\Image;
 
 $image = Image::of('Update this photo of me to be in the style of a impressionist painting.')
     ->attachments([
-        Image::fromStorage('photo.jpg'),
+        Files\Image::fromStorage('photo.jpg'),
     ])
     ->landscape()
     ->generate();

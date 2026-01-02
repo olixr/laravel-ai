@@ -1,8 +1,8 @@
 <?php
 
-namespace Laravel\Ai\Messages\Attachments;
+namespace Laravel\Ai\Files;
 
-class StoredDocument extends Document
+class StoredImage extends Image
 {
     public function __construct(public string $path, public ?string $disk = null) {}
 }

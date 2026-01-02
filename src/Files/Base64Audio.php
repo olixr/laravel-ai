@@ -1,6 +1,6 @@
 <?php
 
-namespace Laravel\Ai\Messages\Attachments;
+namespace Laravel\Ai\Files;
 
 class Base64Audio extends Audio implements TranscribableAudio
 {
