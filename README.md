@@ -1183,7 +1183,7 @@ Document::fromString('Hello, Laravel!', mime: 'text/plain')->put();
 
 Files::assertUploaded(fn (StorableFile $file) =>
     (string) $file === 'Hello, Laravel!' &&
-        $file->storableMimeType() === 'text/plain';
+        $file->mimeType() === 'text/plain';
 );
 
 Files::assertNotUploaded(fn (StorableFile $file) =>

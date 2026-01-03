@@ -14,8 +14,8 @@ trait CanBeUploadedToProvider
     {
         return Files::put(
             $this,
-            mime: $mime ?? $this->storableMimeType() ?? null,
-            name: $name ?? $this->storableName() ?? null,
+            mime: $mime ?? $this->mimeType() ?? null,
+            name: $name ?? $this->name() ?? null,
             provider: $provider
         );
     }

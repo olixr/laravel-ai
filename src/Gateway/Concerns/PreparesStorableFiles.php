@@ -14,9 +14,9 @@ trait PreparesStorableFiles
     protected function prepareStorableFile(StorableFile $file): array
     {
         return [
-            $file->storableContent(),
-            $file->storableMimeType() ?? 'application/octet-stream',
-            $file->storableName() ?? 'file',
+            $file->content(),
+            $file->mimeType() ?? 'application/octet-stream',
+            $file->name() ?? 'file',
         ];
     }
 }

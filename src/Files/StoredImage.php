@@ -16,30 +16,30 @@ class StoredImage extends Image implements StorableFile
     /**
      * Get the raw representation of the file.
      */
-    public function storableContent(): string
+    public function content(): string
     {
         return Storage::disk($this->disk)->get($this->path) ??
             throw new RuntimeException('File ['.$this->path.'] does not exist on disk ['.$this->disk.'].');
     }
 
     /**
-     * Get the storable display name of the file.
+     * Get the displayable name of the file.
      */
-    public function storableName(): ?string
+    public function name(): ?string
     {
         return $this->name ?? basename($this->path);
     }
 
     /**
-     * Get the MIME type for storage.
+     * Get the file's MIME type.
      */
-    public function storableMimeType(): ?string
+    public function mimeType(): ?string
     {
         return Storage::disk($this->disk)->mimeType($this->path);
     }
 
     public function __toString(): string
     {
-        return $this->storableContent();
+        return $this->content();
     }
 }

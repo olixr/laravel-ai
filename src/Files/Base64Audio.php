@@ -17,23 +17,15 @@ class Base64Audio extends Audio implements StorableFile, TranscribableAudio
     /**
      * Get the raw representation of the file.
      */
-    public function storableContent(): string
+    public function content(): string
     {
         return base64_decode($this->base64);
     }
 
     /**
-     * Get the storable display name of the file.
+     * Get the file's MIME type.
      */
-    public function storableName(): ?string
-    {
-        return $this->name;
-    }
-
-    /**
-     * Get the MIME type for storage.
-     */
-    public function storableMimeType(): ?string
+    public function mimeType(): ?string
     {
         return $this->mime;
     }
@@ -47,25 +39,9 @@ class Base64Audio extends Audio implements StorableFile, TranscribableAudio
     }
 
     /**
-     * Get the raw representation of the audio for transcription.
-     */
-    public function transcribableContent(): string
-    {
-        return base64_decode($this->base64);
-    }
-
-    /**
-     * Get the MIME type for transcription.
-     */
-    public function transcribableMimeType(): ?string
-    {
-        return $this->mime;
-    }
-
-    /**
      * Set the audio's MIME type.
      */
-    public function withMime(string $mime): static
+    public function withMimeType(string $mime): static
     {
         $this->mime = $mime;
 
@@ -74,6 +50,6 @@ class Base64Audio extends Audio implements StorableFile, TranscribableAudio
 
     public function __toString(): string
     {
-        return $this->storableContent();
+        return $this->content();
     }
 }

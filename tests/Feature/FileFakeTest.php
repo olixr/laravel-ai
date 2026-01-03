@@ -79,13 +79,13 @@ class FileFakeTest extends TestCase
         Files::assertUploaded(fn (StorableFile $file) => (string) $file === 'Hello, World!');
 
         Files::assertUploaded(fn (StorableFile $file) => trim((string) $file) === 'I am a local document.');
-        Files::assertUploaded(fn (StorableFile $file) => $file->storableName() === 'document.txt');
+        Files::assertUploaded(fn (StorableFile $file) => $file->name() === 'document.txt');
 
         Files::assertUploaded(fn (StorableFile $file) => trim((string) $file) === 'I am an expense report.');
-        Files::assertUploaded(fn (StorableFile $file) => $file->storableName() === 'report.txt');
+        Files::assertUploaded(fn (StorableFile $file) => $file->name() === 'report.txt');
 
-        Files::assertUploaded(fn (StorableFile $file) => $file->storableMimeType() === 'text/plain');
-        Files::assertNotUploaded(fn (StorableFile $file) => $file->storableMimeType() === 'application/json');
+        Files::assertUploaded(fn (StorableFile $file) => $file->mimeType() === 'text/plain');
+        Files::assertNotUploaded(fn (StorableFile $file) => $file->mimeType() === 'application/json');
     }
 
     public function test_can_assert_no_files_were_uploaded(): void

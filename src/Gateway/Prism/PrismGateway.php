@@ -346,7 +346,7 @@ class PrismGateway implements Gateway
                 ->using(static::toPrismProvider($provider), $model)
                 ->withInput(match (true) {
                     $audio instanceof TranscribableAudio => Audio::fromBase64(
-                        base64_encode($audio->transcribableContent()), $audio->transcribableMimeType()
+                        base64_encode($audio->content()), $audio->mimeType()
                     ),
                 });
 

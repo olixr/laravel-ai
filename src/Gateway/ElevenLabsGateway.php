@@ -71,11 +71,11 @@ class ElevenLabsGateway implements AudioGateway, TranscriptionGateway
         bool $diarize = false,
     ): TranscriptionResponse {
         $audioContent = match (true) {
-            $audio instanceof TranscribableAudio => $audio->transcribableContent(),
+            $audio instanceof TranscribableAudio => $audio->content(),
         };
 
         $mimeType = match (true) {
-            $audio instanceof TranscribableAudio => $audio->transcribableMimeType(),
+            $audio instanceof TranscribableAudio => $audio->mimeType(),
         };
 
         try {

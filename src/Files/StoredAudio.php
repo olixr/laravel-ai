@@ -19,24 +19,24 @@ class StoredAudio extends Audio implements StorableFile, TranscribableAudio
     /**
      * Get the raw representation of the file.
      */
-    public function storableContent(): string
+    public function content(): string
     {
         return Storage::disk($this->disk)->get($this->path) ??
             throw new RuntimeException('File ['.$this->path.'] does not exist on disk ['.$this->disk.'].');
     }
 
     /**
-     * Get the storable display name of the file.
+     * Get the displayable name of the file.
      */
-    public function storableName(): ?string
+    public function name(): ?string
     {
         return $this->name ?? basename($this->path);
     }
 
     /**
-     * Get the MIME type for storage.
+     * Get the file's MIME type.
      */
-    public function storableMimeType(): ?string
+    public function mimeType(): ?string
     {
         return Storage::disk($this->disk)->mimeType($this->path);
     }
@@ -49,24 +49,8 @@ class StoredAudio extends Audio implements StorableFile, TranscribableAudio
         return Transcription::of($this);
     }
 
-    /**
-     * Get the raw representation of the audio for transcription.
-     */
-    public function transcribableContent(): string
-    {
-        return $this->storableContent();
-    }
-
-    /**
-     * Get the MIME type for transcription.
-     */
-    public function transcribableMimeType(): ?string
-    {
-        return $this->storableMimeType();
-    }
-
     public function __toString(): string
     {
-        return $this->storableContent();
+        return $this->content();
     }
 }

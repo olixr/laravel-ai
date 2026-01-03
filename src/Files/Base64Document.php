@@ -14,23 +14,15 @@ class Base64Document extends Document implements StorableFile
     /**
      * Get the raw representation of the file.
      */
-    public function storableContent(): string
+    public function content(): string
     {
         return base64_decode($this->base64);
     }
 
     /**
-     * Get the storable display name of the file.
+     * Get the file's MIME type.
      */
-    public function storableName(): ?string
-    {
-        return $this->name;
-    }
-
-    /**
-     * Get the MIME type for storage.
-     */
-    public function storableMimeType(): ?string
+    public function mimeType(): ?string
     {
         return $this->mime;
     }
@@ -38,7 +30,7 @@ class Base64Document extends Document implements StorableFile
     /**
      * Set the document's MIME type.
      */
-    public function withMime(string $mime): static
+    public function withMimeType(string $mime): static
     {
         $this->mime = $mime;
 
@@ -47,6 +39,6 @@ class Base64Document extends Document implements StorableFile
 
     public function __toString(): string
     {
-        return $this->storableContent();
+        return $this->content();
     }
 }

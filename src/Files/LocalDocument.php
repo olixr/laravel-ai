@@ -15,23 +15,23 @@ class LocalDocument extends Document implements StorableFile
     /**
      * Get the raw representation of the file.
      */
-    public function storableContent(): string
+    public function content(): string
     {
         return file_get_contents($this->path);
     }
 
     /**
-     * Get the storable display name of the file.
+     * Get the displayable name of the file.
      */
-    public function storableName(): ?string
+    public function name(): ?string
     {
         return $this->name ?? basename($this->path);
     }
 
     /**
-     * Get the MIME type for storage.
+     * Get the file's MIME type.
      */
-    public function storableMimeType(): ?string
+    public function mimeType(): ?string
     {
         return $this->mime ?? (new Filesystem)->mimeType($this->path);
     }
@@ -39,7 +39,7 @@ class LocalDocument extends Document implements StorableFile
     /**
      * Set the document's MIME type.
      */
-    public function withMime(string $mime): static
+    public function withMimeType(string $mime): static
     {
         $this->mime = $mime;
 
@@ -48,6 +48,6 @@ class LocalDocument extends Document implements StorableFile
 
     public function __toString(): string
     {
-        return $this->storableContent();
+        return $this->content();
     }
 }
