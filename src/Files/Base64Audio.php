@@ -39,7 +39,7 @@ class Base64Audio extends Audio implements StorableFile, TranscribableAudio
     /**
      * Get the Base64 representation of the audio for transcription.
      */
-    public function toBase64ForTranscription(): string
+    public function transcribableContent(): string
     {
         return $this->base64;
     }

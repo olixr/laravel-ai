@@ -72,7 +72,7 @@ class ElevenLabsGateway implements AudioGateway, TranscriptionGateway
         bool $diarize = false,
     ): TranscriptionResponse {
         $audioContent = match (true) {
-            $audio instanceof TranscribableAudio => base64_decode($audio->toBase64ForTranscription()),
+            $audio instanceof TranscribableAudio => base64_decode($audio->transcribableContent()),
             $audio instanceof UploadedFile => $audio->get(),
         };
 

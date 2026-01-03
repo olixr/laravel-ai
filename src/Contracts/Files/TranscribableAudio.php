@@ -4,7 +4,7 @@ namespace Laravel\Ai\Contracts\Files;
 
 interface TranscribableAudio
 {
-    public function toBase64ForTranscription(): string;
+    public function transcribableContent(): string;
 
     public function transcribableMimeType(): ?string;
 }
