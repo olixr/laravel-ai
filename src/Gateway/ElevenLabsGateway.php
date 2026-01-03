@@ -77,7 +77,7 @@ class ElevenLabsGateway implements AudioGateway, TranscriptionGateway
         };
 
         $mimeType = match (true) {
-            $audio instanceof TranscribableAudio => $audio->mimeTypeForTranscription(),
+            $audio instanceof TranscribableAudio => $audio->transcribableMimeType(),
             $audio instanceof UploadedFile => $audio->getClientMimeType(),
         };
 

@@ -6,5 +6,5 @@ interface TranscribableAudio
 {
     public function toBase64ForTranscription(): string;
 
-    public function mimeTypeForTranscription(): ?string;
+    public function transcribableMimeType(): ?string;
 }

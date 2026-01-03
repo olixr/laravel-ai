@@ -32,7 +32,7 @@ class LocalAudio extends Audio implements StorableFile, TranscribableAudio
     /**
      * Get the MIME type for transcription.
      */
-    public function mimeTypeForTranscription(): ?string
+    public function transcribableMimeType(): ?string
     {
         return $this->mime ?? (new Filesystem)->mimeType($this->path);
     }
