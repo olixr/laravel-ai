@@ -740,12 +740,19 @@ The `Laravel\Ai\Files` class or the individual file classes may be used to store
 
 ```php
 use Laravel\Ai\Files\Document;
+use Laravel\Ai\Files\Image;
 
 // Store a file from a local path...
 $response = Document::fromPath('/home/laravel/document.pdf')->put();
+$response = Image::fromPath('/home/laravel/photo.jpg')->put();
 
 // Store a file that is stored on a filesystem disk...
 $response = Document::fromStorage('document.pdf', disk: 'local')->put();
+$response = Image::fromStorage('photo.jpg', disk: 'local')->put();
+
+// Store a file that is stored on a remote URL...
+$response = Document::fromUrl('https://example.com/document.pdf')->put();
+$response = Image::fromUrl('https://example.com/photo.jpg')->put();
 
 return $response->id;
 ```
