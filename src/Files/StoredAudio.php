@@ -5,10 +5,13 @@ namespace Laravel\Ai\Files;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Ai\Contracts\Files\StorableFile;
 use Laravel\Ai\Contracts\Files\TranscribableAudio;
+use Laravel\Ai\Files\Concerns\CanBeUploadedToProvider;
 use RuntimeException;
 
 class StoredAudio extends Audio implements StorableFile, TranscribableAudio
 {
+    use CanBeUploadedToProvider;
+
     public function __construct(public string $path, public ?string $disk = null) {}
 
     /**
@@ -41,7 +44,7 @@ class StoredAudio extends Audio implements StorableFile, TranscribableAudio
      */
     public function storableName(): ?string
     {
-        return basename($this->path);
+        return $this->name ?? basename($this->path);
     }
 
     /**

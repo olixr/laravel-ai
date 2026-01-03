@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Laravel\Ai\Events\FileDeleted;
 use Laravel\Ai\Events\FileStored;
 use Laravel\Ai\Events\StoringFile;
-use Laravel\Ai\Files;
+use Laravel\Ai\Files\Document;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -20,65 +20,77 @@ class FileIntegrationTest extends TestCase
     {
         Event::fake();
 
-        $response = Files::put('Hello, World!', 'text/plain', name: 'hello.txt', provider: $this->provider);
+        $response = Document::fromString('Hello, World!', 'text/plain')->put(
+            name: 'hello.txt', provider: $this->provider
+        );
 
         $this->assertNotEmpty($response->id);
 
         Event::assertDispatched(StoringFile::class);
         Event::assertDispatched(FileStored::class);
 
-        Files::delete($response->id, $this->provider);
+        Document::fromId($response->id)->delete(provider: $this->provider);
 
         Event::assertDispatched(FileDeleted::class);
     }
 
     public function test_can_store_files_from_local_paths(): void
     {
-        $response = Files::putFromPath(__DIR__.'/files/document.txt', name: 'document.txt', provider: $this->provider);
+        $response = Document::fromPath(__DIR__.'/files/document.txt')->put(
+            name: 'document.txt', provider: $this->provider,
+        );
 
         $this->assertNotEmpty($response->id);
 
-        Files::delete($response->id, $this->provider);
+        Document::fromId($response->id)->delete(provider: $this->provider);
     }
 
     public function test_can_store_files_from_storage_paths(): void
     {
         Storage::disk('local')->put('document.txt', 'Hello, World!');
 
-        $response = Files::putFromStorage('document.txt', disk: 'local', provider: $this->provider);
+        $response = Document::fromStorage('document.txt', disk: 'local')->put(
+            provider: $this->provider,
+        );
 
         $this->assertNotEmpty($response->id);
 
-        Files::delete($response->id, $this->provider);
+        Document::fromId($response->id)->delete(provider: $this->provider);
     }
 
     public function test_exception_is_thrown_if_stored_file_does_not_exist(): void
     {
         $this->expectException(RuntimeException::class);
 
-        $response = Files::putFromStorage('missing-document.pdf', disk: 'local', provider: $this->provider);
+        $response = Document::fromStorage('missing-document.pdf', disk: 'local')->put(
+            provider: $this->provider,
+        );
     }
 
     public function test_can_get_files(): void
     {
-        $stored = Files::put('Hello, World!', 'text/plain', provider: $this->provider);
+        $stored = Document::fromString('Hello, World!', 'text/plain')->put(
+            name: 'hello.txt', provider: $this->provider
+        );
 
-        $response = Files::get($stored->id, $this->provider);
+        $response = Document::fromId($stored->id)->get(provider: $this->provider);
 
         $this->assertEquals($stored->id, $response->id);
         $this->assertEquals('text/plain', $response->mime);
 
-        Files::delete($stored->id, $this->provider);
+        Document::fromId($response->id)->delete(provider: $this->provider);
     }
 
     public function test_can_delete_files(): void
     {
-        $stored = Files::put('Hello, World!', 'text/plain', provider: $this->provider);
+        $stored = Document::fromString('Hello, World!', 'text/plain')->put(
+            name: 'hello.txt', provider: $this->provider
+        );
 
-        Files::delete($stored->id, $this->provider);
+        Document::fromId($stored->id)->delete(provider: $this->provider);
 
         $this->expectException(RequestException::class);
 
-        Files::get($stored->id, $this->provider);
+        Document::fromId($stored->id)->get(provider: $this->provider);
     }
 }

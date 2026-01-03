@@ -4,9 +4,12 @@ namespace Laravel\Ai\Files;
 
 use Illuminate\Filesystem\Filesystem;
 use Laravel\Ai\Contracts\Files\StorableFile;
+use Laravel\Ai\Files\Concerns\CanBeUploadedToProvider;
 
 class LocalImage extends Image implements StorableFile
 {
+    use CanBeUploadedToProvider;
+
     public function __construct(public string $path, public ?string $mime = null) {}
 
     /**
@@ -22,7 +25,7 @@ class LocalImage extends Image implements StorableFile
      */
     public function storableName(): ?string
     {
-        return basename($this->path);
+        return $this->name ?? basename($this->path);
     }
 
     /**

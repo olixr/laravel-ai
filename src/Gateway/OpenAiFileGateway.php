@@ -36,8 +36,6 @@ class OpenAiFileGateway implements FileGateway
 
         return new FileResponse(
             id: $response->json('id'),
-            content: null,
-            mime: null,
         );
     }
 

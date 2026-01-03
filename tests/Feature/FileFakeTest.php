@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Http\UploadedFile;
 use Laravel\Ai\Contracts\Files\StorableFile;
 use Laravel\Ai\Files;
+use Laravel\Ai\Files\Document;
 use Laravel\Ai\Responses\FileResponse;
 use RuntimeException;
 use Tests\TestCase;
@@ -15,16 +17,19 @@ class FileFakeTest extends TestCase
         Files::fake([
             'first-content',
             fn ($fileId) => "content-for-{$fileId}",
-            new FileResponse('id', 'third-content', 'application/json'),
+            new FileResponse('id', mime: 'application/json', content: 'third-content'),
         ]);
 
         $response = Files::get('file_1');
+        $this->assertEquals('file_1', $response->id);
         $this->assertEquals('first-content', $response->content);
 
         $response = Files::get('file_2');
+        $this->assertEquals('file_2', $response->id);
         $this->assertEquals('content-for-file_2', $response->content);
 
         $response = Files::get('file_3');
+        $this->assertEquals('id', $response->id);
         $this->assertEquals('third-content', $response->content);
     }
 
@@ -33,9 +38,11 @@ class FileFakeTest extends TestCase
         Files::fake();
 
         $response = Files::get('file_1');
+        $this->assertEquals('file_1', $response->id);
         $this->assertEquals('fake-content', $response->content);
 
         $response = Files::get('file_2');
+        $this->assertEquals('file_2', $response->id);
         $this->assertEquals('fake-content', $response->content);
     }
 
@@ -44,9 +51,11 @@ class FileFakeTest extends TestCase
         Files::fake(fn ($fileId) => "content-for-{$fileId}");
 
         $response = Files::get('file_1');
+        $this->assertEquals('file_1', $response->id);
         $this->assertEquals('content-for-file_1', $response->content);
 
         $response = Files::get('file_2');
+        $this->assertEquals('file_2', $response->id);
         $this->assertEquals('content-for-file_2', $response->content);
     }
 
@@ -63,12 +72,18 @@ class FileFakeTest extends TestCase
     {
         Files::fake();
 
-        Files::put('Hello, World!', 'text/plain');
-        Files::putFromPath(__DIR__.'/files/document.txt');
+        Document::fromString('Hello, World!', 'text/plain')->as('document.txt')->put();
+        Document::fromPath(__DIR__.'/files/document.txt')->put();
+        Document::fromUpload(new UploadedFile(__DIR__.'/files/report.txt', 'report.txt'))->put();
 
         Files::assertUploaded(fn (StorableFile $file, $mime) => (string) $file === 'Hello, World!');
+
         Files::assertUploaded(fn (StorableFile $file, $mime) => trim((string) $file) === 'I am a local document.');
         Files::assertUploaded(fn (StorableFile $file, $mime) => $file->storableName() === 'document.txt');
+
+        Files::assertUploaded(fn (StorableFile $file, $mime) => trim((string) $file) === 'I am an expense report.');
+        Files::assertUploaded(fn (StorableFile $file, $mime) => $file->storableName() === 'report.txt');
+
         Files::assertUploaded(fn (StorableFile $file, $mime) => $mime === 'text/plain');
         Files::assertNotUploaded(fn (StorableFile $file, $mime) => $mime === 'application/json');
     }

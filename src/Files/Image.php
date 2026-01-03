@@ -2,6 +2,8 @@
 
 namespace Laravel\Ai\Files;
 
+use Illuminate\Http\UploadedFile;
+
 abstract class Image extends File
 {
     /**
@@ -42,5 +44,16 @@ abstract class Image extends File
     public static function fromStorage(string $path, ?string $disk = null): StoredImage
     {
         return new StoredImage($path, $disk);
+    }
+
+    /**
+     * Create a new Base64 image using the given file upload.
+     */
+    public static function fromUpload(UploadedFile $file, ?string $mime = null): Base64Image
+    {
+        return new Base64Image(
+            base64_encode($file->getContent()),
+            $file->getClientMimeType(),
+        )->as($file->getClientOriginalName());
     }
 }

@@ -736,16 +736,16 @@ $embeddings = Str::of('Napa Valley has great wine.')->toEmbeddings();
 
 ## Files
 
-The `Laravel\Ai\Files` class may be used to store files with your AI provider for later use in conversations. This is useful for large documents or files you want to reference multiple times without re-uploading:
+The `Laravel\Ai\Files` class or the individual file classes may be used to store files with your AI provider for later use in conversations. This is useful for large documents or files you want to reference multiple times without re-uploading:
 
 ```php
-use Laravel\Ai\Files;
+use Laravel\Ai\Files\Document;
 
 // Store a file from a local path...
-$response = Files::putFromPath('/home/laravel/document.pdf');
+$response = Document::fromPath('/home/laravel/document.pdf')->put();
 
 // Store a file that is stored on a filesystem disk...
-$response = Files::putFromStorage('document.pdf', disk: 'local');
+$response = Document::fromStorage('document.pdf', disk: 'local')->put();
 
 return $response->id;
 ```
@@ -754,9 +754,10 @@ You may also store raw content or uploaded files:
 
 ```php
 use Laravel\Ai\Files;
+use Laravel\Ai\Files\Document;
 
 // Store raw content...
-$stored = Files::put('Hello, World!', 'text/plain');
+$stored = Document::fromString('Hello, World!', 'text/plain')->put();
 
 // Store an uploaded file...
 $stored = Files::put($request->file('document'));
@@ -776,10 +777,12 @@ $response = (new SalesCoach)->prompt(
 );
 ```
 
-To retrieve a previously stored file, use the `get` method:
+To retrieve a previously stored file, use the `get` method on a file instance:
 
 ```php
-$file = Files::get('file-id');
+use Laravel\Ai\Files\Document;
+
+$file = Document::fromId('file-id')->get();
 
 $file->id;
 $file->mime;
@@ -788,13 +791,15 @@ $file->mime;
 To delete a file from the provider, use the `delete` method:
 
 ```php
-Files::delete('file-id');
+Document::fromId('file-id')->delete();
 ```
 
-By default, the `Files` class uses the default AI provider configured in your application's `config/ai.php` configuration file. You may specify a different provider using the `provider` argument:
+By default, the `Files` class uses the default AI provider configured in your application's `config/ai.php` configuration file. For most operations, you may specify a different provider using the `provider` argument:
 
 ```php
-$response = Files::put($content, 'text/plain', provider: 'anthropic');
+$response = Document::fromPath(
+    '/home/laravel/document.pdf'
+)->put(provider: 'anthropic');
 ```
 
 ### Using Stored Files in Conversations
@@ -1159,8 +1164,8 @@ Files::fake();
 
 // Provide a list of responses for file retrievals...
 Files::fake([
-    'First file content',
-    'Second file content',
+    new FileResponse('file-id-1'),
+    new FileResponse('file-id-2'),
 ]);
 
 // Dynamically handle file retrievals based on the file ID...
