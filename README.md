@@ -1170,14 +1170,13 @@ Files::fake(fn ($fileId) => "Content for {$fileId}");
 After performing file operations, you may make assertions about the uploads and deletions that occurred:
 
 ```php
-use Illuminate\Http\UploadedFile;
 use Laravel\Ai\Contracts\Files\StorableFile;
 
-Files::assertUploaded(fn (StorableFile|UploadedFile|string $file, ?string $mime) =>
+Files::assertUploaded(fn (StorableFile $file, ?string $mime, ?string $name) =>
     (string) $file === 'Hello, World!'
 );
 
-Files::assertNotUploaded(fn (StorableFile|UploadedFile|string $file, ?string $mime) =>
+Files::assertNotUploaded(fn (StorableFile $file, ?string $mime, ?string $name) =>
     (string) $file === 'Hello, World!'
 );
 

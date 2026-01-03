@@ -24,7 +24,11 @@ class Files
     /**
      * Store the given file.
      */
-    public static function put(StorableFile|UploadedFile|string $file, ?string $mime = null, ?string $name = null, ?string $provider = null): StoredFileResponse
+    public static function put(
+        StorableFile|UploadedFile|string $file,
+        ?string $mime = null,
+        ?string $name = null,
+        ?string $provider = null): StoredFileResponse
     {
         if (is_string($file)) {
             $file = new Base64Document(base64_encode($file), $mime);
