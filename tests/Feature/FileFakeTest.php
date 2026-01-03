@@ -63,8 +63,10 @@ class FileFakeTest extends TestCase
         Files::fake();
 
         Files::put('Hello, World!', 'text/plain');
+        Files::putFromPath(__DIR__.'/files/document.txt');
 
         Files::assertUploaded(fn ($file, $mime) => $file === 'Hello, World!');
+        Files::assertUploaded(fn ($file, $mime) => trim((string) $file) === 'I am a local document.');
         Files::assertUploaded(fn ($file, $mime) => $mime === 'text/plain');
         Files::assertNotUploaded(fn ($file, $mime) => $mime === 'application/json');
     }

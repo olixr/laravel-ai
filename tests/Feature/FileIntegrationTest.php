@@ -43,7 +43,7 @@ class FileIntegrationTest extends TestCase
 
     public function test_can_store_files_from_storage_paths(): void
     {
-        Storage::disk('local')->put('document.txt', 'Hello World');
+        Storage::disk('local')->put('document.txt', 'Hello, World!');
 
         $response = Files::putFromStorage('document.txt', disk: 'local', provider: $this->provider);
 
