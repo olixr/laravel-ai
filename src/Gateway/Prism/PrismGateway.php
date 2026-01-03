@@ -9,6 +9,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\JsonSchema\JsonSchemaTypeFactory;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
+use Laravel\Ai\Contracts\Files\TranscribableAudio;
 use Laravel\Ai\Contracts\Gateway\Gateway;
 use Laravel\Ai\Contracts\Prompt;
 use Laravel\Ai\Contracts\Providers\AudioProvider;

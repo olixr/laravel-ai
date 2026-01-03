@@ -2,16 +2,28 @@
 
 namespace Laravel\Ai\Files;
 
-class LocalAudio extends Audio implements TranscribableAudio
+use Illuminate\Filesystem\Filesystem;
+use Laravel\Ai\Contracts\Files\StorableFile;
+use Laravel\Ai\Contracts\Files\TranscribableAudio;
+
+class LocalAudio extends Audio implements StorableFile, TranscribableAudio
 {
     public function __construct(public string $path, public ?string $mime = null) {}
+
+    /**
+     * Get the raw representation of the file.
+     */
+    public function content(): string
+    {
+        return file_get_contents($this->path);
+    }
 
     /**
      * Get the Base64 representation of the audio for transcription.
      */
     public function toBase64ForTranscription(): string
     {
-        return base64_encode(file_get_contents($path));
+        return base64_encode(file_get_contents($this->path));
     }
 
     /**
@@ -19,7 +31,23 @@ class LocalAudio extends Audio implements TranscribableAudio
      */
     public function mimeTypeForTranscription(): ?string
     {
-        return $this->mime;
+        return $this->mime ?? (new Filesystem)->mimeType($this->path);
+    }
+
+    /**
+     * Get the raw representation of the file.
+     */
+    public function storableContent(): string
+    {
+        return file_get_contents($this->path);
+    }
+
+    /**
+     * Get the MIME type for storage.
+     */
+    public function storableMimeType(): ?string
+    {
+        return $this->mime ?? (new Filesystem)->mimeType($this->path);
     }
 
     /**
@@ -30,5 +58,10 @@ class LocalAudio extends Audio implements TranscribableAudio
         $this->mime = $mime;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->storableContent();
     }
 }

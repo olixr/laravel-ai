@@ -4,6 +4,7 @@ namespace Laravel\Ai\PendingResponses;
 
 use Illuminate\Http\UploadedFile;
 use Laravel\Ai\Ai;
+use Laravel\Ai\Contracts\Files\TranscribableAudio;
 use Laravel\Ai\Events\ProviderFailedOver;
 use Laravel\Ai\Exceptions\FailoverableException;
 use Laravel\Ai\FakePendingDispatch;
