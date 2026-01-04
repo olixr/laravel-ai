@@ -3,7 +3,6 @@
 namespace Laravel\Ai\Gateway;
 
 use DateInterval;
-use DateTime;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;

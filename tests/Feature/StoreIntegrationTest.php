@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use DateInterval;
 use Illuminate\Support\Facades\Event;
 use Laravel\Ai\Events\CreatingStore;
 use Laravel\Ai\Events\StoreCreated;
@@ -44,7 +43,7 @@ class StoreIntegrationTest extends TestCase
     {
         $created = Stores::create(
             name: 'Expiring Store',
-            description: 'A store that expires after 7 days of inactivity',
+            description: 'A store that expires after 7 days of inactivity.',
             expiresWhenIdleFor: days(7),
             provider: $this->provider,
         );
