@@ -43,6 +43,7 @@ use Prism\Prism\Exceptions\PrismException as PrismVendorException;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\ValueObjects\Media\Audio;
 use Prism\Prism\ValueObjects\Media\Image as PrismImage;
+use Prism\Prism\ValueObjects\ProviderTool;
 
 class PrismGateway implements Gateway
 {
@@ -89,12 +90,14 @@ class PrismGateway implements Gateway
             throw PrismException::toAiException($e, $provider, $model);
         }
 
+        $citations = PrismCitations::toLaravelCitations($response->additionalContent);
+
         return $structured
             ? (new StructuredTextResponse(
                 $response->structured,
                 $response->text,
                 PrismUsage::toLaravelUsage($response->usage),
-                new Meta($provider->name(), $response->meta->model),
+                new Meta($provider->name(), $response->meta->model, $citations),
             ))->withToolCallsAndResults(
                 toolCalls: collect($response->toolCalls)->map(PrismTool::toLaravelToolCall(...)),
                 toolResults: collect($response->toolResults)->map(PrismTool::toLaravelToolResult(...)),
@@ -102,7 +105,7 @@ class PrismGateway implements Gateway
             : (new TextResponse(
                 $response->text,
                 PrismUsage::toLaravelUsage($response->usage),
-                new Meta($provider->name(), $response->meta->model),
+                new Meta($provider->name(), $response->meta->model, $citations),
             ))->withMessages(
                 PrismMessages::toLaravelMessages($response->messages)
             )->withSteps(PrismSteps::toLaravelSteps($response->steps, $provider));
