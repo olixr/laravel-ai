@@ -5,7 +5,6 @@ namespace Laravel\Ai\Contracts\Providers;
 use DateInterval;
 use Illuminate\Support\Collection;
 use Laravel\Ai\Contracts\Gateway\StoreGateway;
-use Laravel\Ai\Responses\CreatedStoreResponse;
 use Laravel\Ai\Store;
 
 interface StoreProvider
@@ -23,7 +22,7 @@ interface StoreProvider
         ?string $description = null,
         ?Collection $fileIds = null,
         ?DateInterval $expiresWhenIdleFor = null,
-    ): CreatedStoreResponse;
+    ): Store;
 
     /**
      * Delete a vector store by its ID.

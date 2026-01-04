@@ -8,7 +8,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Ai\Contracts\Gateway\StoreGateway;
 use Laravel\Ai\Contracts\Providers\StoreProvider;
-use Laravel\Ai\Responses\CreatedStoreResponse;
 use Laravel\Ai\Responses\Data\StoreFileCounts;
 use Laravel\Ai\Store;
 use RuntimeException;
@@ -90,8 +89,14 @@ class FakeStoreGateway implements StoreGateway
         ?string $description = null,
         ?Collection $fileIds = null,
         ?DateInterval $expiresWhenIdleFor = null,
-    ): CreatedStoreResponse {
-        return new CreatedStoreResponse('vs_'.Str::random(24));
+    ): Store {
+        return new Store(
+            provider: $provider,
+            id: 'vs_'.Str::random(24),
+            name: $name,
+            fileCounts: new StoreFileCounts(0, 0, 0),
+            ready: true,
+        );
     }
 
     /**

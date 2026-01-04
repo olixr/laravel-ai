@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Http;
 use Laravel\Ai\Contracts\Gateway\StoreGateway;
 use Laravel\Ai\Contracts\Providers\StoreProvider;
 use Laravel\Ai\Exceptions\RateLimitedException;
-use Laravel\Ai\Responses\CreatedStoreResponse;
 use Laravel\Ai\Responses\Data\StoreFileCounts;
 use Laravel\Ai\Store;
 
@@ -57,7 +56,7 @@ class OpenAiStoreGateway implements StoreGateway
         ?string $description = null,
         ?Collection $fileIds = null,
         ?DateInterval $expiresWhenIdleFor = null,
-    ): CreatedStoreResponse {
+    ): Store {
         try {
             $fileIds ??= new Collection;
 
@@ -82,7 +81,7 @@ class OpenAiStoreGateway implements StoreGateway
             throw $e;
         }
 
-        return new CreatedStoreResponse($response->json('id'));
+        return $this->getStore($provider, $response->json('id'));
     }
 
     /**

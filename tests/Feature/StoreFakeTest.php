@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use DateInterval;
 use Illuminate\Support\Collection;
-use Laravel\Ai\Store;
 use Laravel\Ai\Stores;
 use RuntimeException;
 use Tests\TestCase;

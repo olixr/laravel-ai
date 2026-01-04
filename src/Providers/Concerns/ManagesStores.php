@@ -9,7 +9,6 @@ use Laravel\Ai\Ai;
 use Laravel\Ai\Events\CreatingStore;
 use Laravel\Ai\Events\StoreCreated;
 use Laravel\Ai\Events\StoreDeleted;
-use Laravel\Ai\Responses\CreatedStoreResponse;
 use Laravel\Ai\Store;
 
 trait ManagesStores
@@ -30,7 +29,7 @@ trait ManagesStores
         ?string $description = null,
         ?Collection $fileIds = null,
         ?DateInterval $expiresWhenIdleFor = null,
-    ): CreatedStoreResponse {
+    ): Store {
         $invocationId = (string) Str::uuid7();
 
         $fileIds ??= new Collection;
@@ -45,9 +44,9 @@ trait ManagesStores
 
         return tap(
             $this->storeGateway()->createStore($this, $name, $description, $fileIds, $expiresWhenIdleFor),
-            function (CreatedStoreResponse $response) use ($invocationId, $name, $description, $fileIds, $expiresWhenIdleFor) {
+            function (Store $store) use ($invocationId, $name, $description, $fileIds, $expiresWhenIdleFor) {
                 $this->events->dispatch(new StoreCreated(
-                    $invocationId, $this, $name, $description, $fileIds, $expiresWhenIdleFor, $response,
+                    $invocationId, $this, $name, $description, $fileIds, $expiresWhenIdleFor, $store,
                 ));
             }
         );

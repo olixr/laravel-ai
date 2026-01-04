@@ -5,7 +5,7 @@ namespace Laravel\Ai\Events;
 use DateInterval;
 use Illuminate\Support\Collection;
 use Laravel\Ai\Providers\Provider;
-use Laravel\Ai\Responses\CreatedStoreResponse;
+use Laravel\Ai\Store;
 
 class StoreCreated
 {
@@ -16,6 +16,6 @@ class StoreCreated
         public ?string $description,
         public Collection $fileIds,
         public ?DateInterval $expiresWhenIdleFor,
-        public CreatedStoreResponse $response,
+        public Store $store,
     ) {}
 }

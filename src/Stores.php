@@ -6,7 +6,6 @@ use Closure;
 use DateInterval;
 use Illuminate\Support\Collection;
 use Laravel\Ai\Gateway\FakeStoreGateway;
-use Laravel\Ai\Responses\CreatedStoreResponse;
 
 class Stores
 {
@@ -26,7 +25,7 @@ class Stores
         ?string $description = null,
         Collection|array $fileIds = [],
         ?DateInterval $expiresWhenIdleFor = null,
-        ?string $provider = null): CreatedStoreResponse
+        ?string $provider = null): Store
     {
         return Ai::fakeableStoreProvider($provider)->createStore(
             $name, $description, Collection::make($fileIds), $expiresWhenIdleFor
