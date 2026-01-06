@@ -11,6 +11,7 @@ use Laravel\Ai\Files\ProviderDocument;
 use Laravel\Ai\Stores;
 use RuntimeException;
 use Tests\TestCase;
+
 use function Illuminate\Support\days;
 
 class StoreFakeTest extends TestCase
