@@ -8,15 +8,17 @@ use Laravel\Ai\Contracts\Providers\EmbeddingProvider;
 use Laravel\Ai\Contracts\Providers\FileProvider;
 use Laravel\Ai\Contracts\Providers\ImageProvider;
 use Laravel\Ai\Contracts\Providers\StoreProvider;
+use Laravel\Ai\Contracts\Providers\SupportsFileSearch;
 use Laravel\Ai\Contracts\Providers\SupportsWebFetch;
 use Laravel\Ai\Contracts\Providers\SupportsWebSearch;
 use Laravel\Ai\Contracts\Providers\TextProvider;
 use Laravel\Ai\Gateway\GeminiFileGateway;
 use Laravel\Ai\Gateway\GeminiStoreGateway;
+use Laravel\Ai\Providers\Tools\FileSearch;
 use Laravel\Ai\Providers\Tools\WebFetch;
 use Laravel\Ai\Providers\Tools\WebSearch;
 
-class GeminiProvider extends Provider implements EmbeddingProvider, FileProvider, ImageProvider, StoreProvider, SupportsWebFetch, SupportsWebSearch, TextProvider
+class GeminiProvider extends Provider implements EmbeddingProvider, FileProvider, ImageProvider, StoreProvider, SupportsFileSearch, SupportsWebFetch, SupportsWebSearch, TextProvider
 {
     use Concerns\GeneratesEmbeddings;
     use Concerns\GeneratesImages;
@@ -29,6 +31,16 @@ class GeminiProvider extends Provider implements EmbeddingProvider, FileProvider
     use Concerns\ManagesFiles;
     use Concerns\ManagesStores;
     use Concerns\StreamsText;
+
+    /**
+     * Get the file search tool options for the provider.
+     */
+    public function fileSearchToolOptions(FileSearch $search): array
+    {
+        return [
+            'fileSearchStoreNames' => $search->storeIds,
+        ];
+    }
 
     /**
      * Get the web fetch tool options for the provider.

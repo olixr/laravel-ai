@@ -8,14 +8,16 @@ use Laravel\Ai\Events\StoreCreated;
 use Laravel\Ai\Events\StoreDeleted;
 use Laravel\Ai\Files;
 use Laravel\Ai\Files\Document;
+use Laravel\Ai\Providers\Tools\FileSearch;
 use Laravel\Ai\Stores;
 use Tests\TestCase;
 
 use function Illuminate\Support\days;
+use function Laravel\Ai\agent;
 
 class StoreIntegrationTest extends TestCase
 {
-    protected $provider = 'openai';
+    protected $provider = 'gemini';
 
     public function test_can_create_get_and_delete_store(): void
     {
@@ -84,5 +86,27 @@ class StoreIntegrationTest extends TestCase
 
         // Clean up...
         $store->delete();
+    }
+
+    public function test_can_actually_prompt_an_agent_with_file_search_data()
+    {
+        // OpenAI: vs_695d788d9afc8191aa87e0ef81bacbda, file-7r66Gzib7ooyhJcxKDyq2q
+        // Gemini: fileSearchStores/laravel-ai-sdk-test-store-ur5230zq9t31, kxv9av2adm6m-wys58b8hnirl
+        $storeId = $this->provider === 'openai'
+            ? 'vs_695d788d9afc8191aa87e0ef81bacbda'
+            : 'fileSearchStores/laravel-ai-sdk-test-store-ur5230zq9t31';
+
+        // $store = Stores::get($storeId, provider: $this->provider);
+        // $document = $store->add(Document::fromPath(__DIR__.'/../../tmp/laravel.pdf'));
+
+        $response = agent(
+            instructions: 'You will use the file search tool available to you to answer questions about the documents you have access to.',
+            tools: [
+                new FileSearch([$storeId]),
+            ],
+        )->prompt('Is Valkey mentioned in the sixth month roadmap? Can you quote the section where it is mentioned?', provider: $this->provider);
+
+        $this->assertTrue(str_contains((string) $response, 'Yes'));
+        $this->assertTrue(str_contains((string) $response, 'Valkey'));
     }
 }

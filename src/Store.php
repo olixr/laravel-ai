@@ -59,7 +59,7 @@ class Store
      */
     protected function storeFile(StorableFile $file): HasProviderId
     {
-        return Files::put($file);
+        return Files::put($file, provider: $this->provider->name());
     }
 
     /**
@@ -72,7 +72,7 @@ class Store
         if ($deleteFile && $removed) {
             Files::delete(
                 $documentId instanceof HasProviderId ? $documentId->id() : $documentId,
-                $this->provider->name()
+                provider: $this->provider->name()
             );
         }
 

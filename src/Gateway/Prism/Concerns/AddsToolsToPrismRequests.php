@@ -3,6 +3,7 @@
 namespace Laravel\Ai\Gateway\Prism\Concerns;
 
 use Illuminate\JsonSchema\JsonSchemaTypeFactory;
+use Laravel\Ai\Contracts\Providers\SupportsFileSearch;
 use Laravel\Ai\Contracts\Providers\SupportsWebFetch;
 use Laravel\Ai\Contracts\Providers\SupportsWebSearch;
 use Laravel\Ai\Contracts\Tool;
@@ -10,6 +11,7 @@ use Laravel\Ai\Gateway\Prism\PrismTool;
 use Laravel\Ai\Gateway\TextGenerationOptions;
 use Laravel\Ai\ObjectSchema;
 use Laravel\Ai\Providers\Provider;
+use Laravel\Ai\Providers\Tools\FileSearch;
 use Laravel\Ai\Providers\Tools\ProviderTool;
 use Laravel\Ai\Providers\Tools\WebFetch;
 use Laravel\Ai\Providers\Tools\WebSearch;
@@ -75,11 +77,27 @@ trait AddsToolsToPrismRequests
         return $request
             ->withProviderTools(collect($tools)->map(function ($tool) use ($provider) {
                 return match (true) {
+                    $tool instanceof FileSearch => $this->addFileSearchTool($provider, $tool),
                     $tool instanceof WebFetch => $this->addWebFetchTool($provider, $tool),
                     $tool instanceof WebSearch => $this->addWebSearchTool($provider, $tool),
                     default => null,
                 };
             })->filter()->values()->all());
+    }
+
+    /**
+     * Create the Prism provider tool for file search.
+     */
+    protected function addFileSearchTool(Provider $provider, FileSearch $tool): PrismProviderTool
+    {
+        $options = $provider instanceof SupportsFileSearch
+            ? $provider->fileSearchToolOptions($tool)
+            : throw new RuntimeException('Provider ['.$provider->name().'] does not support file search.');
+
+        return match ($provider->driver()) {
+            'openai' => new PrismProviderTool('file_search', options: $options),
+            'gemini' => new PrismProviderTool('fileSearch', options: $options),
+        };
     }
 
     /**
