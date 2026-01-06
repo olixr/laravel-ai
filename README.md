@@ -19,6 +19,7 @@ The official Laravel AI SDK.
     - [Prompting](#prompting)
     - [Conversation Context](#conversation-context)
     - [Tools](#tools)
+    - [Provider Tools](#provider-tools)
     - [Structured Output](#structured-output)
     - [Attachments](#attachments)
     - [Streaming](#streaming)
@@ -234,6 +235,7 @@ By passing additional arguments to the `prompt` method, you may override the def
 $response = (new SalesCoach)->prompt(
     'Analyze this sales transcript...',
     provider: 'anthropic',
+    model: 'claude-haiku-4-5-20251001',
 );
 ```
 
@@ -329,6 +331,10 @@ public function tools(): iterable
     ];
 }
 ```
+
+### Provider Tools
+
+Foo
 
 ### Structured Output
 
