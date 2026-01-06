@@ -115,18 +115,25 @@ $image = Image::of('A donut sitting on the kitchen counter.')->generate();
 $audio = Audio::of('I love coding with Laravel.')->generate();
 
 // Transcriptions (STT)...
+$transcript = Transcription::fromPath('/path/to/audio.mp3')->generate();
 $transcript = Transcription::fromStorage('audio.mp3')->generate();
+$transcript = Transcription::fromUpload($request->file('audio'))->generate();
 
 // Embeddings...
 $embeddings = Str::of('Napa Valley has great wine.')->toEmbeddings();
 
 // Files...
 $file = Document::fromPath('/path/to/document.pdf')->put();
+$file = Document::fromStorage('document.pdf')->put();
+$file = Document::fromUpload($request->file('document'))->put();
 
 // Vector Stores...
 $store = Stores::create('My Knowledge Base');
 
 $document = $store->add(Document::fromPath('/path/to/document.pdf'));
+$document = $store->add(Document::fromStorage('document.pdf'));
+$document = $store->add(Document::fromId('file_id'));
+$document = $store->add($request->file('document'));
 ```
 
 ## Agents
