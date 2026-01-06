@@ -917,7 +917,7 @@ $document->id;
 $document->fileId;
 ```
 
-> **Note:** Typically, when adding previously stored files to vector stores, the document ID returned when adding a file to a vector store will match the file's previously assigned ID; however, some vector storage providers may return a new, different "document ID". Therefore, it's recommended that you always store both IDs in your database for future reference.
+> **Note:** Typically, when adding previously stored files to vector stores, the returned document ID will match the file's previously assigned ID; however, some vector storage providers may return a new, different "document ID". Therefore, it's recommended that you always store both IDs in your database for future reference.
 
 To remove a file from a store, use the `remove` method:
 
