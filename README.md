@@ -128,7 +128,7 @@ $file = Document::fromStorage('document.pdf')->put();
 $file = Document::fromUpload($request->file('document'))->put();
 
 // Vector Stores...
-$store = Stores::create('My Knowledge Base');
+$store = Stores::create('Knowledge Base');
 
 $document = $store->add(Document::fromPath('/path/to/document.pdf'));
 $document = $store->add(Document::fromStorage('document.pdf'));
@@ -898,11 +898,11 @@ Vector stores allow you to create searchable collections of files that can be us
 use Laravel\Ai\Stores;
 
 // Create a new vector store...
-$store = Stores::create('My Knowledge Base');
+$store = Stores::create('Knowledge Base');
 
 // Create a store with additional options...
 $store = Stores::create(
-    name: 'My Knowledge Base',
+    name: 'Knowledge Base',
     description: 'Documentation and reference materials.',
     expiresWhenIdleFor: days(30),
 );
@@ -1348,13 +1348,13 @@ Once store operations have been faked, you may make assertions about the stores 
 use Laravel\Ai\Stores;
 
 // Create store...
-$store = Stores::create('My Knowledge Base');
+$store = Stores::create('Knowledge Base');
 
 // Make assertions...
-Stores::assertCreated('My Knowledge Base');
+Stores::assertCreated('Knowledge Base');
 
 Stores::assertCreated(fn (string $name, ?string $description) =>
-    $name === 'My Knowledge Base'
+    $name === 'Knowledge Base'
 );
 
 Stores::assertNotCreated('Other Store');
