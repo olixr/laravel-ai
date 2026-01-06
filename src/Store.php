@@ -3,6 +3,7 @@
 namespace Laravel\Ai;
 
 use Closure;
+use Illuminate\Http\UploadedFile;
 use Laravel\Ai\Contracts\Files\HasProviderId;
 use Laravel\Ai\Contracts\Files\StorableFile;
 use Laravel\Ai\Contracts\Providers\FileProvider;
@@ -24,9 +25,9 @@ class Store
     /**
      * Add a file to the store.
      */
-    public function add(StorableFile|HasProviderId|string $file): AddedDocumentResponse
+    public function add(StorableFile|UploadedFile|HasProviderId|string $file): AddedDocumentResponse
     {
-        if ($file instanceof StorableFile) {
+        if ($file instanceof StorableFile || $file instanceof UploadedFile) {
             $file = $this->storeFile($file);
         }
 
