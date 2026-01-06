@@ -78,12 +78,11 @@ class StoreIntegrationTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $refreshed->fileCounts->completed + $refreshed->fileCounts->pending);
 
         // Remove the file from the store....
-        $removed = $store->remove($documentId);
+        $removed = $store->remove($documentId, deleteFile: true);
 
         $this->assertTrue($removed);
 
         // Clean up...
         $store->delete();
-        Files::delete($file->id, provider: $this->provider);
     }
 }

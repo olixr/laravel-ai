@@ -42,9 +42,18 @@ class Store
     /**
      * Remove a file from the store.
      */
-    public function remove(HasProviderId|string $file): bool
+    public function remove(HasProviderId|string $file, $deleteFile = false): bool
     {
-        return $this->provider->removeFileFromStore($this->id, $file);
+        $removed = $this->provider->removeFileFromStore($this->id, $file);
+
+        if ($deleteFile && $removed) {
+            Files::delete(
+                $file instanceof HasProviderId ? $file->id() : $file,
+                $this->provider->name()
+            );
+        }
+
+        return $removed;
     }
 
     /**

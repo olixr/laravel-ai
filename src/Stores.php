@@ -97,6 +97,54 @@ class Stores
     }
 
     /**
+     * Assert that a file was added to a store.
+     */
+    public static function assertFileAdded(Closure|string $storeId, ?string $fileId = null): void
+    {
+        Ai::assertFileAddedToStore($storeId, $fileId);
+    }
+
+    /**
+     * Assert that a file was not added to a store.
+     */
+    public static function assertFileNotAdded(Closure|string $storeId, ?string $fileId = null): void
+    {
+        Ai::assertFileNotAddedToStore($storeId, $fileId);
+    }
+
+    /**
+     * Assert that no files were added to any store.
+     */
+    public static function assertNoFilesAdded(): void
+    {
+        Ai::assertNoFilesAddedToStore();
+    }
+
+    /**
+     * Assert that a file was removed from a store.
+     */
+    public static function assertFileRemoved(Closure|string $storeId, ?string $fileId = null): void
+    {
+        Ai::assertFileRemovedFromStore($storeId, $fileId);
+    }
+
+    /**
+     * Assert that a file was not removed from a store.
+     */
+    public static function assertFileNotRemoved(Closure|string $storeId, ?string $fileId = null): void
+    {
+        Ai::assertFileNotRemovedFromStore($storeId, $fileId);
+    }
+
+    /**
+     * Assert that no files were removed from any store.
+     */
+    public static function assertNoFilesRemoved(): void
+    {
+        Ai::assertNoFilesRemovedFromStore();
+    }
+
+    /**
      * Determine if store operations are faked.
      */
     public static function isFaked(): bool

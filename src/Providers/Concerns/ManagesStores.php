@@ -58,6 +58,10 @@ trait ManagesStores
      */
     public function addFileToStore(string $storeId, HasProviderId $file): string
     {
+        if (Ai::storesAreFaked()) {
+            Ai::recordFileAddition($storeId, $file->id());
+        }
+
         return $this->storeGateway()->addFile($this, $storeId, $file->id());
     }
 
@@ -66,11 +70,13 @@ trait ManagesStores
      */
     public function removeFileFromStore(string $storeId, HasProviderId|string $fileId): bool
     {
-        return $this->storeGateway()->removeFile(
-            $this,
-            $storeId,
-            $fileId instanceof HasProviderId ? $fileId->id() : $fileId
-        );
+        $fileId = $fileId instanceof HasProviderId ? $fileId->id() : $fileId;
+
+        if (Ai::storesAreFaked()) {
+            Ai::recordFileRemoval($storeId, $fileId);
+        }
+
+        return $this->storeGateway()->removeFile($this, $storeId, $fileId);
     }
 
     /**

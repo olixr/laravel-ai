@@ -26,6 +26,16 @@ trait InteractsWithFakeStores
     protected array $recordedStoreDeletions = [];
 
     /**
+     * All of the recorded file additions.
+     */
+    protected array $recordedFileAdditions = [];
+
+    /**
+     * All of the recorded file removals.
+     */
+    protected array $recordedFileRemovals = [];
+
+    /**
      * Fake store operations.
      */
     public function fakeStores(Closure|array $responses = []): FakeStoreGateway
@@ -58,6 +68,32 @@ trait InteractsWithFakeStores
     public function recordStoreDeletion(string $storeId): self
     {
         $this->recordedStoreDeletions[] = $storeId;
+
+        return $this;
+    }
+
+    /**
+     * Record a file addition to a store.
+     */
+    public function recordFileAddition(string $storeId, string $fileId): self
+    {
+        $this->recordedFileAdditions[] = [
+            'storeId' => $storeId,
+            'fileId' => $fileId,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Record a file removal from a store.
+     */
+    public function recordFileRemoval(string $storeId, string $fileId): self
+    {
+        $this->recordedFileRemovals[] = [
+            'storeId' => $storeId,
+            'fileId' => $fileId,
+        ];
 
         return $this;
     }
@@ -173,6 +209,108 @@ trait InteractsWithFakeStores
         PHPUnit::assertEmpty(
             $this->recordedStoreDeletions,
             'Unexpected store deletions were recorded.'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that a file was added to a store matching a given truth test.
+     */
+    public function assertFileAddedToStore(Closure|string $storeId, ?string $fileId = null): self
+    {
+        $callback = $storeId instanceof Closure
+            ? $storeId
+            : fn ($s, $f) => $s === $storeId && $f === $fileId;
+
+        PHPUnit::assertTrue(
+            (new Collection($this->recordedFileAdditions))->filter(function (array $addition) use ($callback) {
+                return $callback($addition['storeId'], $addition['fileId']);
+            })->count() > 0,
+            'An expected file addition was not recorded.'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that a file was not added to a store matching a given truth test.
+     */
+    public function assertFileNotAddedToStore(Closure|string $storeId, ?string $fileId = null): self
+    {
+        $callback = $storeId instanceof Closure
+            ? $storeId
+            : fn ($s, $f) => $s === $storeId && $f === $fileId;
+
+        PHPUnit::assertTrue(
+            (new Collection($this->recordedFileAdditions))->filter(function (array $addition) use ($callback) {
+                return $callback($addition['storeId'], $addition['fileId']);
+            })->count() === 0,
+            'An unexpected file addition was recorded.'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that no files were added to any store.
+     */
+    public function assertNoFilesAddedToStore(): self
+    {
+        PHPUnit::assertEmpty(
+            $this->recordedFileAdditions,
+            'Unexpected file additions were recorded.'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that a file was removed from a store matching a given truth test.
+     */
+    public function assertFileRemovedFromStore(Closure|string $storeId, ?string $fileId = null): self
+    {
+        $callback = $storeId instanceof Closure
+            ? $storeId
+            : fn ($s, $f) => $s === $storeId && $f === $fileId;
+
+        PHPUnit::assertTrue(
+            (new Collection($this->recordedFileRemovals))->filter(function (array $removal) use ($callback) {
+                return $callback($removal['storeId'], $removal['fileId']);
+            })->count() > 0,
+            'An expected file removal was not recorded.'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that a file was not removed from a store matching a given truth test.
+     */
+    public function assertFileNotRemovedFromStore(Closure|string $storeId, ?string $fileId = null): self
+    {
+        $callback = $storeId instanceof Closure
+            ? $storeId
+            : fn ($s, $f) => $s === $storeId && $f === $fileId;
+
+        PHPUnit::assertTrue(
+            (new Collection($this->recordedFileRemovals))->filter(function (array $removal) use ($callback) {
+                return $callback($removal['storeId'], $removal['fileId']);
+            })->count() === 0,
+            'An unexpected file removal was recorded.'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that no files were removed from any store.
+     */
+    public function assertNoFilesRemovedFromStore(): self
+    {
+        PHPUnit::assertEmpty(
+            $this->recordedFileRemovals,
+            'Unexpected file removals were recorded.'
         );
 
         return $this;

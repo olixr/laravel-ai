@@ -68,7 +68,7 @@ class FileFakeTest extends TestCase
         Files::get('file_1');
     }
 
-    public function test_can_assert_file_was_uploaded(): void
+    public function test_can_assert_file_was_stored(): void
     {
         Files::fake();
 
@@ -76,23 +76,23 @@ class FileFakeTest extends TestCase
         Document::fromPath(__DIR__.'/files/document.txt')->put();
         Document::fromUpload(new UploadedFile(__DIR__.'/files/report.txt', 'report.txt'))->put();
 
-        Files::assertUploaded(fn (StorableFile $file) => (string) $file === 'Hello, World!');
+        Files::assertStored(fn (StorableFile $file) => (string) $file === 'Hello, World!');
 
-        Files::assertUploaded(fn (StorableFile $file) => trim((string) $file) === 'I am a local document.');
-        Files::assertUploaded(fn (StorableFile $file) => $file->name() === 'document.txt');
+        Files::assertStored(fn (StorableFile $file) => trim((string) $file) === 'I am a local document.');
+        Files::assertStored(fn (StorableFile $file) => $file->name() === 'document.txt');
 
-        Files::assertUploaded(fn (StorableFile $file) => trim((string) $file) === 'I am an expense report.');
-        Files::assertUploaded(fn (StorableFile $file) => $file->name() === 'report.txt');
+        Files::assertStored(fn (StorableFile $file) => trim((string) $file) === 'I am an expense report.');
+        Files::assertStored(fn (StorableFile $file) => $file->name() === 'report.txt');
 
-        Files::assertUploaded(fn (StorableFile $file) => $file->mimeType() === 'text/plain');
-        Files::assertNotUploaded(fn (StorableFile $file) => $file->mimeType() === 'application/json');
+        Files::assertStored(fn (StorableFile $file) => $file->mimeType() === 'text/plain');
+        Files::assertNotStored(fn (StorableFile $file) => $file->mimeType() === 'application/json');
     }
 
-    public function test_can_assert_no_files_were_uploaded(): void
+    public function test_can_assert_no_files_were_stored(): void
     {
         Files::fake();
 
-        Files::assertNothingUploaded();
+        Files::assertNothingStored();
     }
 
     public function test_can_assert_file_was_deleted(): void

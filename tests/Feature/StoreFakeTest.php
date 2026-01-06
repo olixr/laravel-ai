@@ -165,8 +165,76 @@ class StoreFakeTest extends TestCase
 
         $this->assertNotEmpty($response);
 
-        Files::assertUploaded(
+        Files::assertStored(
             fn (StorableFile $file) => $file->content() === 'Hello, world!'
         );
+    }
+
+    public function test_can_assert_file_added_to_store(): void
+    {
+        Stores::fake();
+
+        $store = Stores::create('My Store');
+        $file = new ProviderDocument('file_123');
+
+        $store->add($file);
+
+        Stores::assertFileAdded(fn ($storeId, $fileId) => $fileId === 'file_123');
+        Stores::assertFileAdded(fn ($storeId, $fileId) => $storeId === $store->id);
+        Stores::assertFileAdded($store->id, 'file_123');
+    }
+
+    public function test_can_assert_file_not_added_to_store(): void
+    {
+        Stores::fake();
+
+        $store = Stores::create('My Store');
+        $file = new ProviderDocument('file_123');
+
+        $store->add($file);
+
+        Stores::assertFileNotAdded(fn ($storeId, $fileId) => $fileId === 'file_456');
+    }
+
+    public function test_can_assert_no_files_added_to_store(): void
+    {
+        Stores::fake();
+
+        Stores::create('My Store');
+
+        Stores::assertNoFilesAdded();
+    }
+
+    public function test_can_assert_file_removed_from_store(): void
+    {
+        Stores::fake();
+
+        $store = Stores::create('My Store');
+
+        $store->remove('file_123');
+
+        Stores::assertFileRemoved(fn ($storeId, $fileId) => $fileId === 'file_123');
+        Stores::assertFileRemoved(fn ($storeId, $fileId) => $storeId === $store->id);
+        Stores::assertFileRemoved($store->id, 'file_123');
+    }
+
+    public function test_can_assert_file_not_removed_from_store(): void
+    {
+        Stores::fake();
+
+        $store = Stores::create('My Store');
+
+        $store->remove('file_123');
+
+        Stores::assertFileNotRemoved(fn ($storeId, $fileId) => $fileId === 'file_456');
+    }
+
+    public function test_can_assert_no_files_removed_from_store(): void
+    {
+        Stores::fake();
+
+        Stores::create('My Store');
+
+        Stores::assertNoFilesRemoved();
     }
 }
