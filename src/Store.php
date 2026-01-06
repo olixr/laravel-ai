@@ -2,6 +2,7 @@
 
 namespace Laravel\Ai;
 
+use Closure;
 use Laravel\Ai\Contracts\Files\HasProviderId;
 use Laravel\Ai\Contracts\Files\StorableFile;
 use Laravel\Ai\Contracts\Providers\FileProvider;
@@ -25,7 +26,7 @@ class Store
     public function add(StorableFile|HasProviderId|string $file): string
     {
         return $this->provider->addFileToStore($this->id, match (true) {
-            is_string($file) => new ProviderDocument($id),
+            is_string($file) => new ProviderDocument($file),
             $file instanceof StorableFile => $this->storeFile($file),
             default => $file,
         });
@@ -70,5 +71,59 @@ class Store
     public function delete(): bool
     {
         return $this->provider->deleteStore($this->id);
+    }
+
+    /**
+     * Assert that a file was added to the store.
+     */
+    public function assertAdded(Closure|string $fileId): self
+    {
+        Ai::assertFileAddedToStore($this->fileAssertionCallback($fileId));
+
+        return $this;
+    }
+
+    /**
+     * Assert that a file was not added to the store.
+     */
+    public function assertNotAdded(Closure|string $fileId): self
+    {
+        Ai::assertFileNotAddedToStore($this->fileAssertionCallback($fileId));
+
+        return $this;
+    }
+
+    /**
+     * Assert that a file was removed from the store.
+     */
+    public function assertRemoved(Closure|string $fileId): self
+    {
+        Ai::assertFileRemovedFromStore($this->fileAssertionCallback($fileId));
+
+        return $this;
+    }
+
+    /**
+     * Assert that a file was not removed from the store.
+     */
+    public function assertNotRemoved(Closure|string $fileId): self
+    {
+        Ai::assertFileNotRemovedFromStore($this->fileAssertionCallback($fileId));
+
+        return $this;
+    }
+
+    /**
+     * Get a callback for matching file assertions on this store.
+     */
+    protected function fileAssertionCallback(Closure|string $fileId): Closure
+    {
+        if ($fileId instanceof Closure) {
+            return fn ($s, $f) => $s === $this->id && $fileId($f);
+        }
+
+        $expectedFileId = str_starts_with($fileId, 'fake_file_') ? $fileId : Files::fakeId($fileId);
+
+        return fn ($s, $f) => $s === $this->id && $f === $expectedFileId;
     }
 }

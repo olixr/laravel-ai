@@ -251,19 +251,6 @@ trait InteractsWithFakeStores
     }
 
     /**
-     * Assert that no files were added to any store.
-     */
-    public function assertNoFilesAddedToStore(): self
-    {
-        PHPUnit::assertEmpty(
-            $this->recordedFileAdditions,
-            'Unexpected file additions were recorded.'
-        );
-
-        return $this;
-    }
-
-    /**
      * Assert that a file was removed from a store matching a given truth test.
      */
     public function assertFileRemovedFromStore(Closure|string $storeId, ?string $fileId = null): self
@@ -310,19 +297,6 @@ trait InteractsWithFakeStores
         $expectedFileId = str_starts_with($fileId, 'fake_file_') ? $fileId : Files::fakeId($fileId);
 
         return fn ($s, $f) => $s === $expectedStoreId && $f === $expectedFileId;
-    }
-
-    /**
-     * Assert that no files were removed from any store.
-     */
-    public function assertNoFilesRemovedFromStore(): self
-    {
-        PHPUnit::assertEmpty(
-            $this->recordedFileRemovals,
-            'Unexpected file removals were recorded.'
-        );
-
-        return $this;
     }
 
     /**

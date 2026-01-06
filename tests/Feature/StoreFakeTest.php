@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use DateInterval;
 use Illuminate\Support\Collection;
+use Laravel\Ai\Ai;
 use Laravel\Ai\Contracts\Files\StorableFile;
 use Laravel\Ai\Files;
 use Laravel\Ai\Files\Document;
@@ -179,13 +180,13 @@ class StoreFakeTest extends TestCase
         $store->add($file);
 
         // Using closure...
-        Stores::assertFileAdded(fn ($storeId, $fileId) => $storeId === $store->id);
+        $store->assertAdded(fn ($fileId) => $fileId === $file->id());
 
         // Using exact IDs...
-        Stores::assertFileAdded($store->id, $file->id());
+        $store->assertAdded($file->id());
 
         // Using friendly names (automatically converted to fake IDs)...
-        Stores::assertFileAdded('My Store', 'test.txt');
+        $store->assertAdded('test.txt');
     }
 
     public function test_can_assert_file_not_added_to_store(): void
@@ -197,16 +198,7 @@ class StoreFakeTest extends TestCase
 
         $store->add($file);
 
-        Stores::assertFileNotAdded(fn ($storeId, $fileId) => $fileId === 'file_456');
-    }
-
-    public function test_can_assert_no_files_added_to_store(): void
-    {
-        Stores::fake();
-
-        Stores::create('My Store');
-
-        Stores::assertNoFilesAdded();
+        $store->assertNotAdded(fn ($fileId) => $fileId === 'file_456');
     }
 
     public function test_can_assert_file_removed_from_store(): void
@@ -219,13 +211,13 @@ class StoreFakeTest extends TestCase
         $store->remove($fileId);
 
         // Using closure...
-        Stores::assertFileRemoved(fn ($storeId, $fileId) => $storeId === $store->id);
+        $store->assertRemoved(fn ($fId) => $fId === $fileId);
 
         // Using exact IDs...
-        Stores::assertFileRemoved($store->id, $fileId);
+        $store->assertRemoved($fileId);
 
         // Using friendly names (automatically converted to fake IDs)...
-        Stores::assertFileRemoved('My Store', 'test.txt');
+        $store->assertRemoved('test.txt');
     }
 
     public function test_can_assert_file_not_removed_from_store(): void
@@ -236,15 +228,6 @@ class StoreFakeTest extends TestCase
 
         $store->remove('file_123');
 
-        Stores::assertFileNotRemoved(fn ($storeId, $fileId) => $fileId === 'file_456');
-    }
-
-    public function test_can_assert_no_files_removed_from_store(): void
-    {
-        Stores::fake();
-
-        Stores::create('My Store');
-
-        Stores::assertNoFilesRemoved();
+        $store->assertNotRemoved(fn ($fileId) => $fileId === 'file_456');
     }
 }
