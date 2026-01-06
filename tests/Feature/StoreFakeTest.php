@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use DateInterval;
 use Illuminate\Support\Collection;
-use Laravel\Ai\Ai;
 use Laravel\Ai\Contracts\Files\StorableFile;
 use Laravel\Ai\Files;
 use Laravel\Ai\Files\Document;
