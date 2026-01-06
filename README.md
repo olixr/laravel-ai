@@ -1338,12 +1338,24 @@ $store = Stores::get('store_id');
 $store->add('added_id');
 $store->remove('removed_id');
 
-// Make assertions against the file ID...
+// Make assertions...
 $store->assertAdded('added_id');
 $store->assertRemoved('removed_id');
 
 $store->assertNotAdded('other_file_id');
 $store->assertNotRemoved('other_file_id');
+```
+
+If a file is stored in the provider's [file storage](#files) and added to a vector store in the same request, you may not know the file's provider ID. In this case, you can pass a closure to the `assertAdded` method to assert against the content of the added file:
+
+```php
+use Laravel\Ai\Contracts\Files\StorableFile;
+use Laravel\Ai\Files\Document;
+
+$store->add(Document::fromString('Hello, World!', 'text/plain')->as('hello.txt'));
+
+$store->assertAdded(fn (StorableFile $file) => $file->name() === 'hello.txt');
+$store->assertAdded(fn (StorableFile $file) => $file->content() === 'Hello, World!');
 ```
 
 ## Events
