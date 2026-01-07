@@ -3,36 +3,29 @@
 namespace Laravel\Ai\Gateway;
 
 use DateInterval;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Laravel\Ai\Contracts\Gateway\StoreGateway;
 use Laravel\Ai\Contracts\Providers\StoreProvider;
-use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Responses\Data\StoreFileCounts;
 use Laravel\Ai\Store;
 
 class OpenAiStoreGateway implements StoreGateway
 {
+    use Concerns\HandlesRateLimiting;
+
     /**
      * Get a vector store by its ID.
      */
     public function getStore(StoreProvider $provider, string $storeId): Store
     {
-        try {
-            $response = Http::withToken($provider->providerCredentials()['key'])
+        $response = $this->withRateLimitHandling(
+            $provider->name(),
+            fn () => Http::withToken($provider->providerCredentials()['key'])
                 ->get("https://api.openai.com/v1/vector_stores/{$storeId}")
-                ->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+                ->throw()
+        );
 
         return new Store(
             provider: $provider,
@@ -57,10 +50,11 @@ class OpenAiStoreGateway implements StoreGateway
         ?Collection $fileIds = null,
         ?DateInterval $expiresWhenIdleFor = null,
     ): Store {
-        try {
-            $fileIds ??= new Collection;
+        $fileIds ??= new Collection;
 
-            $response = Http::withToken($provider->providerCredentials()['key'])
+        $response = $this->withRateLimitHandling(
+            $provider->name(),
+            fn () => Http::withToken($provider->providerCredentials()['key'])
                 ->post('https://api.openai.com/v1/vector_stores', array_filter([
                     'name' => $name,
                     'description' => $description,
@@ -70,16 +64,8 @@ class OpenAiStoreGateway implements StoreGateway
                         'days' => $this->intervalToDays($expiresWhenIdleFor),
                     ] : null,
                 ]))
-                ->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+                ->throw()
+        );
 
         return $this->getStore($provider, $response->json('id'));
     }
@@ -89,22 +75,15 @@ class OpenAiStoreGateway implements StoreGateway
      */
     public function addFile(StoreProvider $provider, string $storeId, string $fileId, array $metadata = []): string
     {
-        try {
-            $response = Http::withToken($provider->providerCredentials()['key'])
+        $response = $this->withRateLimitHandling(
+            $provider->name(),
+            fn () => Http::withToken($provider->providerCredentials()['key'])
                 ->post("https://api.openai.com/v1/vector_stores/{$storeId}/files", array_filter([
                     'file_id' => $fileId,
                     'attributes' => ! empty($metadata) ? $metadata : null,
                 ]))
-                ->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+                ->throw()
+        );
 
         return $response->json('id');
     }
@@ -114,19 +93,12 @@ class OpenAiStoreGateway implements StoreGateway
      */
     public function removeFile(StoreProvider $provider, string $storeId, string $documentId): bool
     {
-        try {
-            $response = Http::withToken($provider->providerCredentials()['key'])
+        $response = $this->withRateLimitHandling(
+            $provider->name(),
+            fn () => Http::withToken($provider->providerCredentials()['key'])
                 ->delete("https://api.openai.com/v1/vector_stores/{$storeId}/files/{$documentId}")
-                ->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+                ->throw()
+        );
 
         return $response->json('deleted', false);
     }
@@ -136,19 +108,9 @@ class OpenAiStoreGateway implements StoreGateway
      */
     public function deleteStore(StoreProvider $provider, string $storeId): bool
     {
-        try {
-            $response = Http::withToken($provider->providerCredentials()['key'])
-                ->delete("https://api.openai.com/v1/vector_stores/{$storeId}")
-                ->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $response = $this->withRateLimitHandling($provider->name(), fn () => Http::withToken($provider->providerCredentials()['key'])
+            ->delete("https://api.openai.com/v1/vector_stores/{$storeId}")
+            ->throw());
 
         return $response->json('deleted', false);
     }

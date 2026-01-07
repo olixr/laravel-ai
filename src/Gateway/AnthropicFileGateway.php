@@ -2,17 +2,16 @@
 
 namespace Laravel\Ai\Gateway;
 
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Laravel\Ai\Contracts\Files\StorableFile;
 use Laravel\Ai\Contracts\Gateway\FileGateway;
 use Laravel\Ai\Contracts\Providers\FileProvider;
-use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Responses\FileResponse;
 use Laravel\Ai\Responses\StoredFileResponse;
 
 class AnthropicFileGateway implements FileGateway
 {
+    use Concerns\HandlesRateLimiting;
     use Concerns\PreparesStorableFiles;
 
     /**
@@ -20,21 +19,11 @@ class AnthropicFileGateway implements FileGateway
      */
     public function getFile(FileProvider $provider, string $fileId): FileResponse
     {
-        try {
-            $response = Http::withHeaders([
-                'x-api-key' => $provider->providerCredentials()['key'],
-                'anthropic-version' => '2023-06-01',
-                'anthropic-beta' => 'files-api-2025-04-14',
-            ])->get("https://api.anthropic.com/v1/files/{$fileId}")->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $response = $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'x-api-key' => $provider->providerCredentials()['key'],
+            'anthropic-version' => '2023-06-01',
+            'anthropic-beta' => 'files-api-2025-04-14',
+        ])->get("https://api.anthropic.com/v1/files/{$fileId}")->throw());
 
         return new FileResponse(
             id: $response->json('id'),
@@ -51,24 +40,14 @@ class AnthropicFileGateway implements FileGateway
     ): StoredFileResponse {
         [$content, $mime, $name] = $this->prepareStorableFile($file);
 
-        try {
-            $response = Http::withHeaders([
-                'x-api-key' => $provider->providerCredentials()['key'],
-                'anthropic-version' => '2023-06-01',
-                'anthropic-beta' => 'files-api-2025-04-14',
-            ])
-                ->attach('file', $content, $name, ['Content-Type' => $mime])
-                ->post('https://api.anthropic.com/v1/files')
-                ->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $response = $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'x-api-key' => $provider->providerCredentials()['key'],
+            'anthropic-version' => '2023-06-01',
+            'anthropic-beta' => 'files-api-2025-04-14',
+        ])
+            ->attach('file', $content, $name, ['Content-Type' => $mime])
+            ->post('https://api.anthropic.com/v1/files')
+            ->throw());
 
         return new StoredFileResponse($response->json('id'));
     }
@@ -78,22 +57,12 @@ class AnthropicFileGateway implements FileGateway
      */
     public function deleteFile(FileProvider $provider, string $fileId): void
     {
-        try {
-            Http::withHeaders([
-                'x-api-key' => $provider->providerCredentials()['key'],
-                'anthropic-version' => '2023-06-01',
-                'anthropic-beta' => 'files-api-2025-04-14',
-            ])
-                ->delete("https://api.anthropic.com/v1/files/{$fileId}")
-                ->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'x-api-key' => $provider->providerCredentials()['key'],
+            'anthropic-version' => '2023-06-01',
+            'anthropic-beta' => 'files-api-2025-04-14',
+        ])
+            ->delete("https://api.anthropic.com/v1/files/{$fileId}")
+            ->throw());
     }
 }

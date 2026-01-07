@@ -3,17 +3,17 @@
 namespace Laravel\Ai\Gateway;
 
 use DateInterval;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Laravel\Ai\Contracts\Gateway\StoreGateway;
 use Laravel\Ai\Contracts\Providers\StoreProvider;
-use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Responses\Data\StoreFileCounts;
 use Laravel\Ai\Store;
 
 class GeminiStoreGateway implements StoreGateway
 {
+    use Concerns\HandlesRateLimiting;
+
     /**
      * Get a vector store by its ID.
      */
@@ -21,19 +21,9 @@ class GeminiStoreGateway implements StoreGateway
     {
         $storeId = $this->normalizeStoreId($storeId);
 
-        try {
-            $response = Http::withHeaders([
-                'x-goog-api-key' => $provider->providerCredentials()['key'],
-            ])->get("https://generativelanguage.googleapis.com/v1beta/{$storeId}")->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $response = $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'x-goog-api-key' => $provider->providerCredentials()['key'],
+        ])->get("https://generativelanguage.googleapis.com/v1beta/{$storeId}")->throw());
 
         return new Store(
             provider: $provider,
@@ -58,23 +48,13 @@ class GeminiStoreGateway implements StoreGateway
         ?Collection $fileIds = null,
         ?DateInterval $expiresWhenIdleFor = null,
     ): Store {
-        try {
-            $fileIds ??= new Collection;
+        $fileIds ??= new Collection;
 
-            $response = Http::withHeaders([
-                'x-goog-api-key' => $provider->providerCredentials()['key'],
-            ])->post('https://generativelanguage.googleapis.com/v1beta/fileSearchStores', [
-                'displayName' => $name,
-            ])->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $response = $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'x-goog-api-key' => $provider->providerCredentials()['key'],
+        ])->post('https://generativelanguage.googleapis.com/v1beta/fileSearchStores', [
+            'displayName' => $name,
+        ])->throw());
 
         $store = $this->getStore($provider, $response->json('name'));
 
@@ -95,22 +75,12 @@ class GeminiStoreGateway implements StoreGateway
         $storeId = $this->normalizeStoreId($storeId);
         $fileId = $this->normalizeFileId($fileId);
 
-        try {
-            $response = Http::withHeaders([
-                'x-goog-api-key' => $provider->providerCredentials()['key'],
-            ])->post("https://generativelanguage.googleapis.com/v1beta/{$storeId}:importFile", array_filter([
-                'fileName' => $fileId,
-                'customMetadata' => ! empty($metadata) ? $this->formatMetadata($metadata) : null,
-            ]))->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $response = $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'x-goog-api-key' => $provider->providerCredentials()['key'],
+        ])->post("https://generativelanguage.googleapis.com/v1beta/{$storeId}:importFile", array_filter([
+            'fileName' => $fileId,
+            'customMetadata' => ! empty($metadata) ? $this->formatMetadata($metadata) : null,
+        ]))->throw());
 
         return basename($response->json('name'));
     }
@@ -137,21 +107,11 @@ class GeminiStoreGateway implements StoreGateway
         $storeId = $this->normalizeStoreId($storeId);
         $documentId = $this->normalizeDocumentId($storeId, $documentId);
 
-        try {
-            Http::withHeaders([
-                'x-goog-api-key' => $provider->providerCredentials()['key'],
-            ])->delete("https://generativelanguage.googleapis.com/v1beta/{$documentId}", [
-                'force' => true,
-            ])->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'x-goog-api-key' => $provider->providerCredentials()['key'],
+        ])->delete("https://generativelanguage.googleapis.com/v1beta/{$documentId}", [
+            'force' => true,
+        ])->throw());
 
         return true;
     }
@@ -163,19 +123,9 @@ class GeminiStoreGateway implements StoreGateway
     {
         $storeId = $this->normalizeStoreId($storeId);
 
-        try {
-            Http::withHeaders([
-                'x-goog-api-key' => $provider->providerCredentials()['key'],
-            ])->delete("https://generativelanguage.googleapis.com/v1beta/{$storeId}")->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'x-goog-api-key' => $provider->providerCredentials()['key'],
+        ])->delete("https://generativelanguage.googleapis.com/v1beta/{$storeId}")->throw());
 
         return true;
     }

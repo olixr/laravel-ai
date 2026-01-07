@@ -2,14 +2,12 @@
 
 namespace Laravel\Ai\Gateway;
 
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Laravel\Ai\Contracts\Files\TranscribableAudio;
 use Laravel\Ai\Contracts\Gateway\AudioGateway;
 use Laravel\Ai\Contracts\Gateway\TranscriptionGateway;
 use Laravel\Ai\Contracts\Providers\AudioProvider;
 use Laravel\Ai\Contracts\Providers\TranscriptionProvider;
-use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Files\Audio;
 use Laravel\Ai\Responses\AudioResponse;
 use Laravel\Ai\Responses\Data\Meta;
@@ -19,6 +17,8 @@ use Laravel\Ai\Responses\TranscriptionResponse;
 
 class ElevenLabsGateway implements AudioGateway, TranscriptionGateway
 {
+    use Concerns\HandlesRateLimiting;
+
     /**
      * Generate audio from the given text.
      */
@@ -35,23 +35,12 @@ class ElevenLabsGateway implements AudioGateway, TranscriptionGateway
             default => $voice,
         };
 
-        try {
-            $response = Http::withHeaders([
-                'xi-api-key' => $provider->providerCredentials()['key'],
-            ])->post('https://api.elevenlabs.io/v1/text-to-speech/'.$voice, [
-                'model_id' => $model,
-                'text' => $text,
-            ])
-                ->throw();
-        } catch (RequestException $e) {
-            if ($e->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $response = $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'xi-api-key' => $provider->providerCredentials()['key'],
+        ])->post('https://api.elevenlabs.io/v1/text-to-speech/'.$voice, [
+            'model_id' => $model,
+            'text' => $text,
+        ])->throw());
 
         return new AudioResponse(
             base64_encode((string) $response),
@@ -78,25 +67,15 @@ class ElevenLabsGateway implements AudioGateway, TranscriptionGateway
             $audio instanceof TranscribableAudio => $audio->mimeType(),
         };
 
-        try {
-            $response = Http::withHeaders([
-                'xi-api-key' => $provider->providerCredentials()['key'],
-            ])->attach(
-                'file', $audioContent, 'file', ['Content-Type' => $mimeType],
-            )->post('https://api.elevenlabs.io/v1/speech-to-text', [
-                'model_id' => $model,
-                'language' => $language,
-                'diarize' => $diarize,
-            ])->throw();
-        } catch (RequestException $e) {
-            if ($e->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $response = $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'xi-api-key' => $provider->providerCredentials()['key'],
+        ])->attach(
+            'file', $audioContent, 'file', ['Content-Type' => $mimeType],
+        )->post('https://api.elevenlabs.io/v1/speech-to-text', [
+            'model_id' => $model,
+            'language' => $language,
+            'diarize' => $diarize,
+        ])->throw());
 
         $response = $response->json();
 

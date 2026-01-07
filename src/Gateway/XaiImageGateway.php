@@ -2,12 +2,10 @@
 
 namespace Laravel\Ai\Gateway;
 
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Laravel\Ai\Contracts\Gateway\ImageGateway;
 use Laravel\Ai\Contracts\Providers\ImageProvider;
-use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Files\Image as ImageFile;
 use Laravel\Ai\Responses\Data\GeneratedImage;
 use Laravel\Ai\Responses\Data\Meta;
@@ -16,6 +14,8 @@ use Laravel\Ai\Responses\ImageResponse;
 
 class XaiImageGateway implements ImageGateway
 {
+    use Concerns\HandlesRateLimiting;
+
     /**
      * Generate an image.
      *
@@ -31,24 +31,17 @@ class XaiImageGateway implements ImageGateway
         ?string $size = null,
         ?string $quality = null,
     ): ImageResponse {
-        try {
-            $response = Http::withToken($provider->providerCredentials()['key'])
+        $response = $this->withRateLimitHandling(
+            $provider->name(),
+            fn () => Http::withToken($provider->providerCredentials()['key'])
                 ->timeout(60)
                 ->post('https://api.x.ai/v1/images/generations', [
                     'model' => $model,
                     'prompt' => $prompt,
                     'response_format' => 'b64_json',
                 ])
-                ->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+                ->throw()
+        );
 
         $response = $response->json();
 

@@ -2,17 +2,16 @@
 
 namespace Laravel\Ai\Gateway;
 
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Laravel\Ai\Contracts\Files\StorableFile;
 use Laravel\Ai\Contracts\Gateway\FileGateway;
 use Laravel\Ai\Contracts\Providers\FileProvider;
-use Laravel\Ai\Exceptions\RateLimitedException;
 use Laravel\Ai\Responses\FileResponse;
 use Laravel\Ai\Responses\StoredFileResponse;
 
 class GeminiFileGateway implements FileGateway
 {
+    use Concerns\HandlesRateLimiting;
     use Concerns\PreparesStorableFiles;
 
     /**
@@ -22,19 +21,9 @@ class GeminiFileGateway implements FileGateway
     {
         $fileId = str_starts_with($fileId, 'files/') ? $fileId : "files/{$fileId}";
 
-        try {
-            $response = Http::withHeaders([
-                'x-goog-api-key' => $provider->providerCredentials()['key'],
-            ])->get("https://generativelanguage.googleapis.com/v1beta/{$fileId}")->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $response = $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'x-goog-api-key' => $provider->providerCredentials()['key'],
+        ])->get("https://generativelanguage.googleapis.com/v1beta/{$fileId}")->throw());
 
         return new FileResponse(
             id: $response->json('name'),
@@ -51,23 +40,13 @@ class GeminiFileGateway implements FileGateway
     ): StoredFileResponse {
         [$content, $mime, $name] = $this->prepareStorableFile($file);
 
-        try {
-            $response = Http::withHeaders([
-                'x-goog-api-key' => $provider->providerCredentials()['key'],
-            ])->attach(
-                'file', $content, $name, ['Content-Type' => $mime]
-            )->post('https://generativelanguage.googleapis.com/upload/v1beta/files', [
-                'file' => ['display_name' => $name],
-            ])->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $response = $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'x-goog-api-key' => $provider->providerCredentials()['key'],
+        ])->attach(
+            'file', $content, $name, ['Content-Type' => $mime]
+        )->post('https://generativelanguage.googleapis.com/upload/v1beta/files', [
+            'file' => ['display_name' => $name],
+        ])->throw());
 
         return new StoredFileResponse($response->json('file.name'));
     }
@@ -79,18 +58,8 @@ class GeminiFileGateway implements FileGateway
     {
         $fileId = str_starts_with($fileId, 'files/') ? $fileId : "files/{$fileId}";
 
-        try {
-            Http::withHeaders([
-                'x-goog-api-key' => $provider->providerCredentials()['key'],
-            ])->delete("https://generativelanguage.googleapis.com/v1beta/{$fileId}")->throw();
-        } catch (RequestException $e) {
-            if ($e->response->status() === 429) {
-                throw RateLimitedException::forProvider(
-                    $provider->name(), $e->getCode(), $e
-                );
-            }
-
-            throw $e;
-        }
+        $this->withRateLimitHandling($provider->name(), fn () => Http::withHeaders([
+            'x-goog-api-key' => $provider->providerCredentials()['key'],
+        ])->delete("https://generativelanguage.googleapis.com/v1beta/{$fileId}")->throw());
     }
 }
