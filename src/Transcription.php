@@ -20,13 +20,8 @@ class Transcription
     {
         if (is_string($audio)) {
             $audio = new Base64Audio($audio);
-        }
-
-        if ($audio instanceof UploadedFile) {
-            $audio = new Base64Audio(
-                base64_encode($audio->getContent()),
-                mime: $audio->getClientMimeType()
-            );
+        } elseif ($audio instanceof UploadedFile) {
+            $audio = Base64Audio::fromUpload($audio);
         }
 
         return new PendingTranscriptionGeneration($audio);

@@ -30,10 +30,8 @@ class Store
         array $metadata = [],
     ): AddedDocumentResponse {
         if ($file instanceof UploadedFile) {
-            $file = (new Base64Document(
-                base64_encode($file->getContent()),
-                mime: $mime ?? $file->getClientMimeType()
-            )->as($name ?? $file->getClientOriginalName()));
+            $file = Base64Document::fromUpload($file)
+                ->as($name ?? $file->getClientOriginalName());
         }
 
         $originalFile = $file;

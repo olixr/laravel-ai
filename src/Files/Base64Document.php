@@ -2,6 +2,7 @@
 
 namespace Laravel\Ai\Files;
 
+use Illuminate\Http\UploadedFile;
 use Laravel\Ai\Contracts\Files\StorableFile;
 use Laravel\Ai\Files\Concerns\CanBeUploadedToProvider;
 
@@ -10,6 +11,17 @@ class Base64Document extends Document implements StorableFile
     use CanBeUploadedToProvider;
 
     public function __construct(public string $base64, public ?string $mime = null) {}
+
+    /**
+     * Create a new instance from an uploaded file.
+     */
+    public static function fromUpload(UploadedFile $file, ?string $mime = null): self
+    {
+        return new static(
+            base64_encode($file->getContent()),
+            mime: $mime ?? $file->getClientMimeType(),
+        );
+    }
 
     /**
      * Get the raw representation of the file.

@@ -35,10 +35,8 @@ class Files
         }
 
         if ($file instanceof UploadedFile) {
-            $file = (new Base64Document(
-                base64_encode($file->getContent()),
-                mime: $mime ?? $file->getClientMimeType()
-            )->as($name ?? $file->getClientOriginalName()));
+            $file = Base64Document::fromUpload($file)
+                ->as($name ?? $file->getClientOriginalName());
         }
 
         return Ai::fakeableFileProvider($provider)->putFile($file, $mime, $name);
