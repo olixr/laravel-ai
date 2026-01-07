@@ -29,9 +29,7 @@ trait Promptable
     {
         return $this->withModelFailover(
             $this->withinMiddlewarePipeline(function (AgentPrompt $prompt) {
-                return $prompt->provider()->prompt(
-                    $this, $prompt->prompt, $prompt->attachments->all(), $prompt->model
-                );
+                return $prompt->provider()->prompt($prompt);
             }, $prompt, $attachments),
             $provider,
             $model,
@@ -45,9 +43,7 @@ trait Promptable
     {
         return $this->withModelFailover(
             $this->withinMiddlewarePipeline(function (AgentPrompt $prompt) {
-                return $prompt->provider()->stream(
-                    $this, $prompt->prompt, $prompt->attachments->all(), $prompt->model
-                );
+                return $prompt->provider()->stream($prompt);
             }, $prompt, $attachments),
             $provider,
             $model,

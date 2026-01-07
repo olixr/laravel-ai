@@ -6,7 +6,6 @@ use Illuminate\JsonSchema\JsonSchemaTypeFactory;
 use Illuminate\Support\Str;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
-use Laravel\Ai\Contracts\Gateway\Gateway;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
@@ -25,23 +24,23 @@ trait GeneratesText
     /**
      * Invoke the given agent.
      */
-    public function prompt(Agent $agent, string $prompt, array $attachments, string $model): AgentResponse
+    public function prompt(AgentPrompt $prompt): AgentResponse
     {
         $invocationId = (string) Str::uuid7();
 
-        $this->events->dispatch(new PromptingAgent($invocationId, $agentPrompt = new AgentPrompt(
-            $agent, $prompt, $attachments, $this, $model
-        )));
+        $this->events->dispatch(new PromptingAgent($invocationId, $prompt));
+
+        $agent = $prompt->agent;
 
         $messages = $agent instanceof Conversational ? $agent->messages() : [];
 
-        $messages[] = new UserMessage($prompt, $attachments);
+        $messages[] = new UserMessage($prompt->prompt, $prompt->attachments->all());
 
         $this->listenForToolInvocations($invocationId, $agent);
 
         $response = $this->textGateway()->generateText(
             $this,
-            $model,
+            $prompt->model,
             (string) $agent->instructions(),
             $messages,
             $agent instanceof HasTools ? $agent->tools() : [],
@@ -58,7 +57,7 @@ trait GeneratesText
                 ->withSteps($response->steps);
 
         $this->events->dispatch(
-            new AgentPrompted($invocationId, $agentPrompt, $response)
+            new AgentPrompted($invocationId, $prompt, $response)
         );
 
         return $response;

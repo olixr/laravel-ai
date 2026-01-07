@@ -5,7 +5,6 @@ namespace Laravel\Ai\Providers\Concerns;
 use Illuminate\JsonSchema\JsonSchemaTypeFactory;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Contracts\HasTools;
@@ -23,22 +22,22 @@ trait StreamsText
     /**
      * Stream the response from the given agent.
      */
-    public function stream(Agent $agent, string $prompt, array $attachments, string $model): StreamableAgentResponse
+    public function stream(AgentPrompt $prompt): StreamableAgentResponse
     {
         $invocationId = (string) Str::uuid7();
 
-        return new StreamableAgentResponse($invocationId, function () use ($invocationId, $agent, $prompt, $attachments, $model) {
+        return new StreamableAgentResponse($invocationId, function () use ($invocationId, $prompt) {
+            $agent = $prompt->agent;
+
             if ($agent instanceof HasStructuredOutput) {
                 throw new InvalidArgumentException('Streaming structured output is not currently supported.');
             }
 
-            $this->events->dispatch(new StreamingAgent($invocationId, $agentPrompt = new AgentPrompt(
-                $agent, $prompt, $attachments, $this, $model
-            )));
+            $this->events->dispatch(new StreamingAgent($invocationId, $prompt));
 
             $messages = $agent instanceof Conversational ? $agent->messages() : [];
 
-            $messages[] = new UserMessage($prompt, $attachments);
+            $messages[] = new UserMessage($prompt->prompt, $prompt->attachments->all());
 
             $events = [];
 
@@ -47,7 +46,7 @@ trait StreamsText
             foreach ($this->textGateway()->streamText(
                 $invocationId,
                 $this,
-                $model,
+                $prompt->model,
                 (string) $agent->instructions(),
                 $messages,
                 $agent instanceof HasTools ? $agent->tools() : [],
@@ -62,11 +61,11 @@ trait StreamsText
             $response = new StreamedAgentResponse(
                 $invocationId,
                 collect($events),
-                new Meta($this->name(), $model),
+                new Meta($this->name(), $prompt->model),
             );
 
             $this->events->dispatch(
-                new AgentStreamed($invocationId, $agentPrompt, $response)
+                new AgentStreamed($invocationId, $prompt, $response)
             );
         });
     }
