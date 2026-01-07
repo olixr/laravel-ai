@@ -28,33 +28,33 @@ class ImageResponse implements Countable, Htmlable
     /**
      * Store the image on a filesystem disk.
      */
-    public function store(string $path = '', array|string $options = []): string|bool
+    public function store(string $path = '', ?string $disk = null, array $options = []): string|bool
     {
-        return $this->firstImage()->store($path, $options);
+        return $this->firstImage()->store($path, $disk, $options);
     }
 
     /**
      * Store the image on a filesystem disk with public visibility.
      */
-    public function storePublicly(string $path = '', array|string $options = []): string|bool
+    public function storePublicly(string $path = '', ?string $disk = null, array $options = []): string|bool
     {
-        return $this->firstImage()->storePublicly($path, $options);
+        return $this->firstImage()->storePublicly($path, $disk, $options);
     }
 
     /**
      * Store the image on a filesystem disk with public visibility.
      */
-    public function storePubliclyAs(string $path, string $name, array|string $options = []): string|bool
+    public function storePubliclyAs(string $path, ?string $name = null, ?string $disk = null, array $options = []): string|bool
     {
-        return $this->firstImage()->storePubliclyAs($path, $name, $options);
+        return $this->firstImage()->storePubliclyAs($path, $name, $disk, $options);
     }
 
     /**
      * Store the image on a filesystem disk.
      */
-    public function storeAs(string $path, string $name, array|string $options = []): string|bool
+    public function storeAs(string $path, ?string $name = null, ?string $disk = null, array $options = []): string|bool
     {
-        return $this->firstImage()->storeAs($path, $name, $options);
+        return $this->firstImage()->storeAs($path, $name, $disk, $options);
     }
 
     /**
