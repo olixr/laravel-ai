@@ -417,13 +417,25 @@ You may provide multiple vector store IDs to search across multiple stores:
 new FileSearch(stores: ['store_1', 'store_2']);
 ```
 
-If your files have [metadata](#adding-files-to-stores), you may filter the search results using the `where` method:
+If your files have [metadata](#adding-files-to-stores), you may filter the search results by providing a `where` argument. For simple equality filters, pass an array:
 
 ```php
-(new FileSearch(stores: ['store_id']))->where([
+new FileSearch(stores: ['store_id'], where: [
     'author' => 'Taylor Otwell',
     'year' => 2026,
 ]);
+```
+
+For more complex filters, you may pass a closure that receives a `FileSearchQuery` instance:
+
+```php
+use Laravel\Ai\Providers\Tools\FileSearchQuery;
+
+new FileSearch(stores: ['store_id'], where: fn (FileSearchQuery $query) =>
+    $query->where('author', 'Taylor Otwell')
+        ->whereNot('status', 'draft')
+        ->whereIn('category', ['news', 'updates'])
+);
 ```
 
 ### Structured Output
