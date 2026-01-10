@@ -32,6 +32,7 @@ The official Laravel AI SDK.
 - [Audio (TTS)](#audio)
 - [Transcription (STT)](#transcription)
 - [Embeddings](#embeddings)
+- [Reranking](#reranking)
 - [Files](#files)
 - [Vector Stores](#vector-stores)
     - [Adding Files to Stores](#adding-files-to-stores)
@@ -42,6 +43,7 @@ The official Laravel AI SDK.
     - [Audio](#testing-audio)
     - [Transcriptions](#testing-transcriptions)
     - [Embeddings](#testing-embeddings)
+    - [Reranking](#testing-reranking)
     - [Files](#testing-files)
     - [Vector Stores](#testing-vector-stores)
 - [Events](#events)
@@ -73,6 +75,7 @@ You may define your AI provider credentials in your application's `config/ai.php
 
 ```ini
 ANTHROPIC_API_KEY=
+COHERE_API_KEY=
 ELEVENLABS_API_KEY=
 GEMINI_API_KEY=
 OPENAI_API_KEY=
@@ -91,7 +94,9 @@ The default models used for text, images, audio, transcription, and embeddings m
 
 **STT:** OpenAI, ElevenLabs
 
-**Embeddings:** OpenAI, Gemini
+**Embeddings:** OpenAI, Gemini, Cohere
+
+**Reranking:** Cohere
 
 **Files:** OpenAI, Anthropic, Gemini
 
@@ -122,6 +127,10 @@ $transcript = Transcription::fromUpload($request->file('audio'))->generate();
 
 // Embeddings...
 $embeddings = Str::of('Napa Valley has great wine.')->toEmbeddings();
+
+// Reranking...
+$reranked = Reranking::of($documents)->limit(10)->rerank('search query');
+$reranked = $collection->rerank('content', 'search query', limit: 10);
 
 // Files...
 $file = Document::fromPath('/path/to/document.pdf')->put();
@@ -891,6 +900,65 @@ use Illuminate\Support\Str;
 $embeddings = Str::of('Napa Valley has great wine.')->toEmbeddings();
 ```
 
+## Reranking
+
+Reranking allows you to reorder a list of documents based on their relevance to a given query. This is useful for improving search results by using semantic understanding:
+
+The `Laravel\Ai\Reranking` class may be used to rerank documents:
+
+```php
+use Laravel\Ai\Reranking;
+
+$response = Reranking::of([
+    'Django is a Python web framework.',
+    'Laravel is a PHP web application framework.',
+    'React is a JavaScript library for building user interfaces.',
+])->rerank('PHP frameworks');
+
+// Access the top result...
+$response->first()->document; // "Laravel is a PHP web application framework."
+$response->first()->score;    // 0.95
+$response->first()->index;    // 1 (original position)
+```
+
+The `limit` method may be used to restrict the number of results returned:
+
+```php
+$response = Reranking::of($documents)
+    ->limit(5)
+    ->rerank('search query');
+```
+
+### Reranking Collections
+
+For convenience, Laravel collections may be reranked using the `rerank` macro. The first argument specifies which field(s) to use for reranking, and the second argument is the query:
+
+```php
+// Rerank by a single field...
+$posts = Post::all()
+    ->rerank('body', 'Laravel tutorials');
+
+// Rerank by multiple fields (sent as JSON)...
+$reranked = $posts->rerank(['title', 'body'], 'Laravel tutorials');
+
+// Rerank using a closure to build the document...
+$reranked = $posts->rerank(
+    fn ($post) => $post->title.': '.$post->body,
+    'Laravel tutorials'
+);
+```
+
+You may also limit the number of results and specify a provider:
+
+```php
+$reranked = $posts->rerank(
+    by: 'content',
+    query: 'Laravel tutorials',
+    limit: 10,
+    provider: 'cohere'
+);
+```
+
 ## Files
 
 The `Laravel\Ai\Files` class or the individual file classes may be used to store files with your AI provider for later use in conversations. This is useful for large documents or files you want to reference multiple times without re-uploading:
@@ -1409,6 +1477,42 @@ To ensure all embeddings generations have a corresponding fake response, you may
 Embeddings::fake()->preventStrayEmbeddings();
 ```
 
+<a name="testing-reranking"></a>
+### Reranking
+
+Reranking operations may be faked by invoking the `fake` method on the `Reranking` class:
+
+```php
+use Laravel\Ai\Reranking;
+use Laravel\Ai\Prompts\RerankingPrompt;
+use Laravel\Ai\Responses\Data\RankedDocument;
+
+// Automatically generate a fake reranked responses...
+Reranking::fake();
+
+// Provide custom responses...
+Reranking::fake([
+    [
+        new RankedDocument(index: 0, document: 'First', score: 0.95),
+        new RankedDocument(index: 1, document: 'Second', score: 0.80),
+    ],
+]);
+```
+
+After reranking, you may make assertions about the operations that were performed:
+
+```php
+Reranking::assertReranked(function (RerankingPrompt $prompt) {
+    return $prompt->contains('Laravel') && $prompt->limit === 5;
+});
+
+Reranking::assertNotReranked(
+    fn (RerankingPrompt $prompt) => $prompt->contains('Django')
+);
+
+Reranking::assertNothingReranked();
+```
+
 <a name="testing-files"></a>
 ### Files
 
@@ -1544,6 +1648,8 @@ The Laravel AI SDK dispatches a variety of events, including:
 - `InvokingTool`
 - `PromptingAgent`
 - `RemovingFileFromStore`
+- `Reranked`
+- `Reranking`
 - `StoreCreated`
 - `StoringFile`
 - `StreamingAgent`
