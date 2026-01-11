@@ -93,6 +93,7 @@ class FakeVectorModel
 class FakeQueryBuilder
 {
     protected array $conditions = [];
+
     protected ?int $limit;
 
     public function whereVectorSimilarTo(string $column, string $query): self
