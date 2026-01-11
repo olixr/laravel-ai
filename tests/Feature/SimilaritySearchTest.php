@@ -56,7 +56,7 @@ class SimilaritySearchTest extends TestCase
             FakeVectorModel::class,
             'embedding',
             0.7,
-            fn ($query) => $query->where('active', true)
+            query: fn ($query) => $query->where('active', true)
         );
 
         $results = $search->handle(new Request([
@@ -78,6 +78,7 @@ class FakeVectorModel
 class FakeQueryBuilder
 {
     protected array $conditions = [];
+    protected ?int $limit;
 
     public function whereVectorSimilarTo(string $column, string $query): self
     {
@@ -89,6 +90,13 @@ class FakeQueryBuilder
     public function where(string $column, mixed $value): self
     {
         $this->conditions[$column] = $value;
+
+        return $this;
+    }
+
+    public function limit(int $limit): self
+    {
+        $this->limit = $limit;
 
         return $this;
     }
