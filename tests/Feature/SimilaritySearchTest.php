@@ -65,6 +65,21 @@ class SimilaritySearchTest extends TestCase
 
         $this->assertStringContainsString('Results found.', $results);
     }
+
+    public function test_using_model_excludes_embedding_column_from_results(): void
+    {
+        $search = SimilaritySearch::usingModel(
+            FakeVectorModel::class,
+            'embedding',
+        );
+
+        $results = $search->handle(new Request([
+            'query' => 'search term',
+        ]));
+
+        $this->assertStringNotContainsString('embedding', $results);
+        $this->assertStringContainsString('First document', $results);
+    }
 }
 
 class FakeVectorModel
@@ -104,8 +119,18 @@ class FakeQueryBuilder
     public function get(): Collection
     {
         return collect([
-            ['id' => 1, 'content' => 'First document'],
-            ['id' => 2, 'content' => 'Second document'],
+            new FakeModel(['id' => 1, 'content' => 'First document', 'embedding' => [0.1, 0.2, 0.3]]),
+            new FakeModel(['id' => 2, 'content' => 'Second document', 'embedding' => [0.4, 0.5, 0.6]]),
         ]);
+    }
+}
+
+class FakeModel
+{
+    public function __construct(protected array $attributes) {}
+
+    public function toArray(): array
+    {
+        return $this->attributes;
     }
 }

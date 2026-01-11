@@ -36,7 +36,9 @@ class SimilaritySearch implements Tool
                 $pendingQuery->limit($limit);
             }
 
-            return $pendingQuery->get();
+            return $pendingQuery
+                ->get()
+                ->map(fn ($model) => collect($model->toArray())->except($column)->all());
         });
     }
 
