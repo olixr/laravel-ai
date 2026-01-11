@@ -27,7 +27,7 @@ class PendingReranking
     /**
      * Limit the number of results to return.
      */
-    public function limit(int $limit): self
+    public function limit(?int $limit): self
     {
         $this->limit = $limit;
 

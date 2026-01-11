@@ -11,6 +11,12 @@ class SimilaritySearch implements Tool
 {
     protected ?string $description;
 
+    protected bool $rerank = false;
+
+    protected Closure|array|string|null $rerankBy = null;
+
+    protected ?int $rerankLimit = null;
+
     public function __construct(
         public Closure $using,
     ) {}
@@ -67,8 +73,38 @@ class SimilaritySearch implements Tool
             return 'No relevant results found.';
         }
 
+        if ($this->rerank) {
+            $results = $results->rerank(
+                $this->rerankBy,
+                query: $request->string('query'),
+                limit: $this->rerankLimit
+            );
+        }
+
         return "Relevant results found. They are listed below sorted by relevance:\n\n".
             $results->toJson(JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Set the tool's description.
+     */
+    public function withDescription(string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Indicate that the results should be reranked.
+     */
+    public function rerank(Closure|array|string $by, ?int $limit = null): self
+    {
+        $this->rerank = true;
+        $this->rerankBy = $by;
+        $this->rerankLimit = $limit;
+
+        return $this;
     }
 
     /**
@@ -82,15 +118,5 @@ class SimilaritySearch implements Tool
                 ->description('The search query.')
                 ->required(),
         ];
-    }
-
-    /**
-     * Set the tool's description.
-     */
-    public function withDescription(string $description): self
-    {
-        $this->description = $description;
-
-        return $this;
     }
 }
