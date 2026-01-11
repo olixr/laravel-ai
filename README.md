@@ -19,7 +19,11 @@ The official Laravel AI SDK.
     - [Prompting](#prompting)
     - [Conversation Context](#conversation-context)
     - [Tools](#tools)
+        - [Similarity Search](#similarity-search)
     - [Provider Tools](#provider-tools)
+        - [Web Search](#web-search)
+        - [Web Fetch](#web-fetch)
+        - [File Search](#file-search)
     - [Structured Output](#structured-output)
     - [Attachments](#attachments)
     - [Streaming](#streaming)
@@ -339,6 +343,65 @@ public function tools(): iterable
         new RandomNumberGenerator,
     ];
 }
+```
+
+#### Similarity Search
+
+The `SimilaritySearch` tool allows agents to search for documents similar to a given query using vector embeddings stored in your database. This is useful for retrieval-augmented generation (RAG) when you want to give agents access to search your application's data.
+
+The simplest way to create a similarity search tool is using the `usingModel` method with an Eloquent model that has vector embeddings:
+
+```php
+use App\Models\Document;
+use Laravel\Ai\Tools\SimilaritySearch;
+
+public function tools(): iterable
+{
+    return [
+        SimilaritySearch::usingModel(Document::class, 'embedding'),
+    ];
+}
+```
+
+The first argument is the Eloquent model class, and the second argument is the column containing the vector embeddings.
+
+You may also provide a minimum similarity threshold between `0.0` and `1.0` and a closure to customize the query:
+
+```php
+SimilaritySearch::usingModel(
+    model: Document::class,
+    column: 'embedding',
+    minSimilarity: 0.7,
+    limit: 10,
+    query: fn ($query) => $query->where('published', true),
+),
+```
+
+For more control, you may create a similarity search tool with a custom closure that returns the search results:
+
+```php
+use App\Models\Document;
+use Laravel\Ai\Tools\SimilaritySearch;
+
+public function tools(): iterable
+{
+    return [
+        new SimilaritySearch(using: function (string $query) {
+            return Document::query()
+                ->where('user_id', $this->user->id)
+                ->whereVectorSimilarTo('embedding', $query)
+                ->limit(10)
+                ->get();
+        }),
+    ];
+}
+```
+
+You may customize the tool's description using the `withDescription` method:
+
+```php
+SimilaritySearch::usingModel(Document::class, 'embedding')
+    ->withDescription('Search the knowledge base for relevant articles.'),
 ```
 
 ### Provider Tools
