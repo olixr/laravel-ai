@@ -82,7 +82,7 @@ class SimilaritySearch implements Tool
             );
         }
 
-        return "Relevant results found. They are listed below sorted by relevance:\n\n".
+        return "Relevant results found. They are listed below in order of relevance:\n\n".
             $results->toJson(JSON_PRETTY_PRINT);
     }
 
