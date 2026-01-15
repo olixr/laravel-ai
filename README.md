@@ -244,13 +244,14 @@ $response = (new SalesCoach)->prompt('Analyze this sales transcript...');
 return (string) $response;
 ```
 
-By passing additional arguments to the `prompt` method, you may override the default provider or model when prompting:
+By passing additional arguments to the `prompt` method, you may override the default provider, model, or HTTP timeout when prompting:
 
 ```php
 $response = (new SalesCoach)->prompt(
     'Analyze this sales transcript...',
     provider: 'anthropic',
     model: 'claude-haiku-4-5-20251001',
+    timeout: 120,
 );
 ```
 
@@ -873,7 +874,7 @@ $image = Image::of('A donut sitting on the kitchen counter')->generate();
 $rawContent = (string) $image;
 ```
 
-The `square`, `portrait`, and `landscape` methods may be used to control the aspect ratio of the image, while the `quality` method may be used to guide the model on final image quality (`high`, `medium`, `low`):
+The `square`, `portrait`, and `landscape` methods may be used to control the aspect ratio of the image, while the `quality` method may be used to guide the model on final image quality (`high`, `medium`, `low`). The `timeout` method may be used to specify the HTTP timeout in seconds:
 
 ```php
 use Laravel\Ai\Image;
@@ -881,6 +882,7 @@ use Laravel\Ai\Image;
 $image = Image::of('A donut sitting on the kitchen counter')
     ->quality('high')
     ->landscape()
+    ->timeout(120)
     ->generate();
 ```
 
