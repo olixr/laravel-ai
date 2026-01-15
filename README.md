@@ -84,6 +84,7 @@ COHERE_API_KEY=
 ELEVENLABS_API_KEY=
 GEMINI_API_KEY=
 OPENAI_API_KEY=
+JINA_API_KEY=
 XAI_API_KEY=
 ```
 
@@ -99,9 +100,9 @@ The default models used for text, images, audio, transcription, and embeddings m
 
 **STT:** OpenAI, ElevenLabs
 
-**Embeddings:** OpenAI, Gemini, Cohere
+**Embeddings:** OpenAI, Gemini, Cohere, Jina
 
-**Reranking:** Cohere
+**Reranking:** Cohere, Jina
 
 **Files:** OpenAI, Anthropic, Gemini
 
