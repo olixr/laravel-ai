@@ -18,6 +18,7 @@ The official Laravel AI SDK.
 - [Agents](#agents)
     - [Prompting](#prompting)
     - [Conversation Context](#conversation-context)
+        - [Remembering Conversations](#remembering-conversations)
     - [Tools](#tools)
         - [Similarity Search](#similarity-search)
     - [Provider Tools](#provider-tools)
@@ -275,6 +276,56 @@ public function messages(): iterable
         })->all();
 }
 ```
+
+#### Remembering Conversations
+
+If you would like Laravel to automatically store and retrieve conversation history for your agent, you may use the `RemembersConversations` trait. This trait provides a simple way to persist conversation messages to the database without manually implementing the `Conversational` interface:
+
+```php
+<?php
+
+namespace App\Ai\Agents;
+
+use Laravel\Ai\Concerns\RemembersConversations;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\Conversational;
+use Laravel\Ai\Promptable;
+
+class SalesCoach implements Agent, Conversational
+{
+    use Promptable, RemembersConversations;
+
+    /**
+     * Get the instructions that the agent should follow.
+     */
+    public function instructions(): string
+    {
+        return 'You are a sales coach...';
+    }
+}
+```
+
+To start a new conversation for a user, call the `forUser` method before prompting:
+
+```php
+$response = (new SalesCoach)->forUser($user)->prompt('Hello!');
+
+$conversationId = $response->conversationId;
+```
+
+The conversation ID is returned on the response and can be stored for future reference, or you can retrieve all of a user's conversations from the `agent_conversations` table directly.
+
+To continue an existing conversation, use the `continue` method:
+
+```php
+$response = (new SalesCoach)
+    ->continue($conversationId, as: $user)
+    ->prompt('Tell me more about that.');
+```
+
+When using the `RemembersConversations` trait, previous messages are automatically loaded and included in the conversation context when prompting. New messages (both user and assistant) are automatically stored after each interaction.
+
+> **Note:** Before using the `RemembersConversations` trait, you should publish and run the package migrations to create the necessary database tables.
 
 ### Tools
 
@@ -623,7 +674,7 @@ foreach ($stream as $event) {
 
 #### Streaming Using the Vercel AI SDK Protocol
 
-You may stream the events using the [Vercel AI SDK stream protocol](https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol) by invoking the `usingVercelProtocol` method on the streamable response:
+You may stream the events using the [Vercel AI SDK stream protocol](https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol) by invoking the `usingVercelDataProtocol` method on the streamable response:
 
 ```php
 use App\Ai\Agents\SalesCoach;
@@ -631,7 +682,7 @@ use App\Ai\Agents\SalesCoach;
 Route::get('/coach', function () {
     return (new SalesCoach)
         ->stream('Analyze this sales transcript...')
-        ->usingVercelProtocol();
+        ->usingVercelDataProtocol();
 });
 ```
 
@@ -782,6 +833,7 @@ You may configure text generation options for an agent using PHP attributes. The
 
 - `MaxSteps`: The maximum number of steps the agent may take when using tools.
 - `MaxTokens`: The maximum number of tokens the model may generate.
+- `Provider`: The AI provider (or providers for failover) to use for the agent.
 - `Temperature`: The sampling temperature to use for generation (0.0 to 1.0).
 
 ```php
@@ -791,12 +843,14 @@ namespace App\Ai\Agents;
 
 use Laravel\Ai\Attributes\MaxSteps;
 use Laravel\Ai\Attributes\MaxTokens;
+use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Temperature;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Promptable;
 
 #[MaxSteps(10)]
 #[MaxTokens(4096)]
+#[Provider('anthropic')]
 #[Temperature(0.7)]
 class SalesCoach implements Agent
 {
@@ -865,7 +919,8 @@ use Laravel\Ai\Responses\ImageResponse;
 
 Image::of('A donut sitting on the kitchen counter')
     ->portrait()
-    ->queue(function (ImageResponse $image) {
+    ->queue()
+    ->then(function (ImageResponse $image) {
         $path = $image->store();
 
         // ...
@@ -923,7 +978,8 @@ use Laravel\Ai\Audio;
 use Laravel\Ai\Responses\AudioResponse;
 
 Audio::of('I love coding with Laravel.')
-    ->queue(function (AudioResponse $audio) {
+    ->queue()
+    ->then(function (AudioResponse $audio) {
         $path = $image->store();
 
         // ...
@@ -959,7 +1015,8 @@ use Laravel\Ai\Transcription;
 use Laravel\Ai\Responses\TranscriptionResponse;
 
 Transcription::fromStorage('audio.mp3')
-    ->queue(function (TranscriptionResponse $transcript) {
+    ->queue()
+    ->then(function (TranscriptionResponse $transcript) {
         // ...
     });
 ```
@@ -1010,6 +1067,32 @@ Embedding generation can be cached to avoid redundant API calls for identical in
 ```
 
 When caching is enabled, embeddings are cached for 30 days. The cache key is based on the provider, model, dimensions, and input content, ensuring that identical requests return cached results while different configurations generate fresh embeddings.
+
+You may also enable caching for a specific request using the `cache` method, even when global caching is disabled:
+
+```php
+$response = Embeddings::for(['Napa Valley has great wine.'])
+    ->cache()
+    ->generate();
+```
+
+You may specify a custom cache duration in seconds:
+
+```php
+$response = Embeddings::for(['Napa Valley has great wine.'])
+    ->cache(seconds: 3600) // Cache for 1 hour
+    ->generate();
+```
+
+The `toEmbeddings` Stringable method also accepts a `cache` argument:
+
+```php
+// Cache with default duration...
+$embeddings = Str::of('Napa Valley has great wine.')->toEmbeddings(cache: true);
+
+// Cache for a specific duration...
+$embeddings = Str::of('Napa Valley has great wine.')->toEmbeddings(cache: 3600);
+```
 
 ## Reranking
 
