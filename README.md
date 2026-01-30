@@ -848,6 +848,8 @@ You may configure text generation options for an agent using PHP attributes. The
 - `Provider`: The AI provider (or providers for failover) to use for the agent.
 - `Temperature`: The sampling temperature to use for generation (0.0 to 1.0).
 - `Timeout`: The HTTP timeout in seconds for agent requests (default: 60).
+- `UseCheapestModel`: Use the provider's cheapest text model for cost optimization.
+- `UseSmartestModel`: Use the provider's most capable text model for complex tasks.
 
 ```php
 <?php
@@ -872,6 +874,31 @@ class SalesCoach implements Agent
     use Promptable;
 
     // ...
+}
+```
+
+The `UseCheapestModel` and `UseSmartestModel` attributes allow you to automatically select the most cost-effective or most capable model for a given provider without specifying a model name. This is useful when you want to optimize for cost or capability across different providers:
+
+```php
+use Laravel\Ai\Attributes\UseCheapestModel;
+use Laravel\Ai\Attributes\UseSmartestModel;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Promptable;
+
+#[UseCheapestModel]
+class SimpleSummarizer implements Agent
+{
+    use Promptable;
+
+    // Will use the cheapest model (e.g., Haiku)...
+}
+
+#[UseSmartestModel]
+class ComplexReasoner implements Agent
+{
+    use Promptable;
+
+    // Will use the most capable model (e.g., Opus)...
 }
 ```
 
