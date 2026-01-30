@@ -52,7 +52,7 @@ class XaiProvider extends Provider implements ImageProvider, TextProvider
      */
     public function defaultImageModel(): string
     {
-        return 'grok-2-image-1212';
+        return 'grok-imagine-image';
     }
 
     /**
