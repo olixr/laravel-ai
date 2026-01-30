@@ -236,12 +236,22 @@ class SalesCoach implements Agent, Conversational, HasTools, HasStructuredOutput
 
 ### Prompting
 
-To prompt an agent, you may use the various methods provided by the agent's `Promptable` trait:
+To prompt an agent, first create an instance using the `make` method or standard instantiation, then call `prompt`:
 
 ```php
-$response = (new SalesCoach)->prompt('Analyze this sales transcript...');
+$response = (new SalesCoach)
+    ->prompt('Analyze this sales transcript...');
+
+$response = SalesCoach::make()
+    ->prompt('Analyze this sales transcript...');
 
 return (string) $response;
+```
+
+The `make` method resolves your agent from the container, allowing automatic dependency injection. You may also pass arguments to the agent's constructor:
+
+```php
+$agent = SalesCoach::make(user: $user);
 ```
 
 By passing additional arguments to the `prompt` method, you may override the default provider, model, or HTTP timeout when prompting:
