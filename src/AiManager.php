@@ -13,6 +13,7 @@ use Laravel\Ai\Contracts\Providers\RerankingProvider;
 use Laravel\Ai\Contracts\Providers\StoreProvider;
 use Laravel\Ai\Contracts\Providers\TextProvider;
 use Laravel\Ai\Contracts\Providers\TranscriptionProvider;
+use Laravel\Ai\Enums\AiProvider;
 use Laravel\Ai\Gateway\Prism\PrismGateway;
 use Laravel\Ai\Providers\AnthropicProvider;
 use Laravel\Ai\Providers\CohereProvider;
@@ -348,7 +349,9 @@ class AiManager extends MultipleInstanceManager
      */
     public function getDefaultInstance()
     {
-        return $this->app['config']['ai.default'];
+        $default = $this->app['config']['ai.default'];
+
+        return $default instanceof AiProvider ? $default->value : $default;
     }
 
     /**
@@ -373,6 +376,10 @@ class AiManager extends MultipleInstanceManager
         $config = $this->app['config']->get(
             'ai.providers.'.$name, ['driver' => $name],
         );
+
+        if ($config['driver'] instanceof AiProvider) {
+            $config['driver'] = $config['driver']->value;
+        }
 
         $config['name'] = $name;
 

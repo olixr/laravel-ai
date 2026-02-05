@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Exception;
 use Laravel\Ai\Ai;
+use Laravel\Ai\Enums\AiProvider;
 use Laravel\Ai\Prompts\AgentPrompt;
 use Laravel\Ai\QueuedAgentPrompt;
 use Laravel\Ai\Responses\Data\Meta;
@@ -154,6 +155,18 @@ class AgentFakeTest extends TestCase
 
         AssistantAgent::assertNotQueued(function (QueuedAgentPrompt $prompt) {
             return $prompt->prompt === 'Second prompt';
+        });
+    }
+
+    public function test_queued_agents_accept_ai_provider_enum()
+    {
+        AssistantAgent::fake();
+
+        (new AssistantAgent)->queue('Enum prompt', provider: AiProvider::OPENAI);
+
+        AssistantAgent::assertQueued(function (QueuedAgentPrompt $prompt) {
+            return $prompt->prompt === 'Enum prompt'
+                && $prompt->provider === AiProvider::OPENAI;
         });
     }
 

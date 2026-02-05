@@ -1,6 +1,6 @@
 <?php
 
-use Laravel\Ai\Provider;
+use Laravel\Ai\Enums\AiProvider;
 
 return [
 
@@ -15,12 +15,12 @@ return [
     |
     */
 
-    'default' => 'openai',
-    'default_for_images' => 'gemini',
-    'default_for_audio' => 'openai',
-    'default_for_transcription' => 'openai',
-    'default_for_embeddings' => 'openai',
-    'default_for_reranking' => 'cohere',
+    'default' => AiProvider::OPENAI,
+    'default_for_images' => AiProvider::GEMINI,
+    'default_for_audio' => AiProvider::OPENAI,
+    'default_for_transcription' => AiProvider::OPENAI,
+    'default_for_embeddings' => AiProvider::OPENAI,
+    'default_for_reranking' => AiProvider::COHERE,
 
     /*
     |--------------------------------------------------------------------------
@@ -53,47 +53,47 @@ return [
 
     'providers' => [
         'anthropic' => [
-            'driver' => 'anthropic',
+            'driver' => AiProvider::ANTHROPIC,
             'key' => env('ANTHROPIC_API_KEY'),
         ],
 
         'cohere' => [
-            'driver' => 'cohere',
+            'driver' => AiProvider::COHERE,
             'key' => env('COHERE_API_KEY'),
         ],
 
         'eleven' => [
-            'driver' => 'eleven',
+            'driver' => AiProvider::ELEVEN_LABS,
             'key' => env('ELEVENLABS_API_KEY'),
         ],
 
         'gemini' => [
-            'driver' => 'gemini',
+            'driver' => AiProvider::GEMINI,
             'key' => env('GEMINI_API_KEY'),
         ],
 
         'groq' => [
-            'driver' => 'groq',
+            'driver' => AiProvider::GROQ,
             'key' => env('GROQ_API_KEY'),
         ],
 
         'jina' => [
-            'driver' => 'jina',
+            'driver' => AiProvider::JINA,
             'key' => env('JINA_API_KEY'),
         ],
 
         'openai' => [
-            'driver' => 'openai',
+            'driver' => AiProvider::OPENAI,
             'key' => env('OPENAI_API_KEY'),
         ],
 
         'openrouter' => [
-            'driver' => 'openrouter',
+            'driver' => AiProvider::OPEN_ROUTER,
             'key' => env('OPENROUTER_API_KEY'),
         ],
 
         'xai' => [
-            'driver' => 'xai',
+            'driver' => AiProvider::XAI,
             'key' => env('XAI_API_KEY'),
         ],
     ],

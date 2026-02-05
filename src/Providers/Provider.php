@@ -4,6 +4,7 @@ namespace Laravel\Ai\Providers;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use Laravel\Ai\Contracts\Gateway\Gateway;
+use Laravel\Ai\Enums\AiProvider;
 
 abstract class Provider
 {
@@ -41,16 +42,20 @@ abstract class Provider
     /**
      * Format the given provider / model list.
      */
-    public static function formatProviderAndModelList(array|string $providers, ?string $model = null): array
+    public static function formatProviderAndModelList(AiProvider|array|string $providers, ?string $model = null): array
     {
+        if ($providers instanceof AiProvider) {
+            return [$providers->value => $model];
+        }
+
         if (is_string($providers)) {
             return [$providers => $model];
         }
 
         return collect($providers)->mapWithKeys(function ($value, $key) {
             return is_numeric($key)
-                ? [$value => null] // Provider name and default model...
-                : [$key => $value]; // Provider name and model name...
+                ? [($value instanceof AiProvider ? $value->value : $value) => null]
+                : [($key instanceof AiProvider ? $key->value : $key) => $value];
         })->all();
     }
 }
