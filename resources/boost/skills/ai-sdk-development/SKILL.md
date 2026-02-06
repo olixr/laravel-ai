@@ -316,6 +316,10 @@ $response = (new ChatBot)->continue($conversationId, as: $user)->prompt('More...
 $response = (new MyAgent)->prompt('Hello', provider: ['openai', 'anthropic']);
 ```
 
+## Diagnostics
+
+Use `php artisan ai:diagnose` to check SDK configuration, provider connectivity, and capability support.
+
 ## Testing and Faking
 
 Each capability supports `fake()` with assertions:
@@ -370,7 +374,7 @@ $store->assertAdded('file_id');
 - Agent pattern: Implement the `Agent` interface and use the `Promptable` trait
 - Optional interfaces: `HasTools`, `HasMiddleware`, `HasStructuredOutput`, `Conversational`
 - Entry-point classes: `Image`, `Audio`, `Transcription`, `Embeddings`, `Reranking`, `Stores`
-- Artisan commands: `php artisan make:agent`, `php artisan make:tool`
+- Artisan commands: `php artisan make:agent`, `php artisan make:tool`, `php artisan ai:diagnose`
 - Global helper: `agent()` for anonymous agents
 
 ## Common Pitfalls
